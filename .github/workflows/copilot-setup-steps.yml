@@ -1,0 +1,67 @@
+name: "Copilot Setup Steps"
+
+# This workflow is intended to be run by the Copilot Agent. It supports being called
+# directly via `workflow_call`, manual runs, and runs when the workflow file changes.
+on:
+  workflow_call:
+    inputs:
+      dotnet-version:
+        description: 'Dotnet SDK version to install (actions/setup-dotnet)'
+        required: false
+        type: string
+        default: '9.0.x'
+
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+# Prevent overlapping runs and keep a single active setup per workflow
+concurrency:
+  group: copilot-setup-steps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
+
+    # Set the permissions to the lowest permissions possible needed for your steps.
+    # Copilot will be given its own token for its operations.
+    permissions:
+      # Minimal permissions required for Copilot to operate on PRs and to clone repository contents.
+      # `contents: read` allows reading repository files. `pull-requests: write` allows updating PR metadata/status.
+      contents: read
+      pull-requests: write
+      issues: write
+
+    # You can define any steps you want, and they will run before the agent starts.
+    # If you do not check out your code, Copilot will do this for you.
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4.2.0
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Update dotnet SDKs
+      run: dotnet workload update
+
+    - name: Install Aspire workload
+      run: dotnet workload install aspire
+
+    - name: Install LibMan CLI
+      run: dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+
+    - name: Restore NuGet packages
+      run: dotnet restore
+
+    # safety: limit job runtime so self-hosted runners aren't tied up forever
+    - name: Job timeout sentinel
+      run: echo "setup steps completed"
