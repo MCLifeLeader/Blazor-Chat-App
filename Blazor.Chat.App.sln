@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Web", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Tests", "src\Blazor.Chat.App\Blazor.Chat.App.Tests\Blazor.Chat.App.Tests.csproj", "{08293ED8-456C-E8A0-AB6C-36EEC26264AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Data", "src\Blazor.Chat.App\Blazor.Chat.App.Data\Blazor.Chat.App.Data.csproj", "{05122283-2EB4-4073-873C-A6DF56F98EAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
