@@ -1,12 +1,19 @@
 using Blazor.Chat.App.Data.Db;
 
-namespace Blazor.Chat.App.ServiceDefaults.Repositories
+namespace Blazor.Chat.App.Data.Repositories
 {
     /// <summary>
     /// Repository interface for managing outbox entries
     /// </summary>
     public interface IOutboxRepository
     {
+        /// <summary>
+        /// Create a standalone outbox entry (not part of a message creation transaction)
+        /// </summary>
+        Task<ChatOutbox> CreateOutboxEntryAsync(
+            ChatOutbox outboxEntry,
+            CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Get pending outbox entries for processing
         /// </summary>

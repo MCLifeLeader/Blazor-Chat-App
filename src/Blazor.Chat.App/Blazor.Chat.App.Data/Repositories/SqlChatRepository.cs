@@ -1,5 +1,4 @@
 using Blazor.Chat.App.Data.Db;
-using Blazor.Chat.App.ServiceDefaults.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

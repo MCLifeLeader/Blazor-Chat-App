@@ -1,6 +1,6 @@
 using Blazor.Chat.App.Data.Db;
 
-namespace Blazor.Chat.App.ServiceDefaults.Repositories
+namespace Blazor.Chat.App.Data.Repositories
 {
     /// <summary>
     /// Repository interface for SQL Server-based chat operations

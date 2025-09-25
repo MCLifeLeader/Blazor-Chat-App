@@ -1,5 +1,4 @@
 using Blazor.Chat.App.Data.Db;
-using Blazor.Chat.App.ServiceDefaults.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +16,19 @@ namespace Blazor.Chat.App.Data.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public async Task<ChatOutbox> CreateOutboxEntryAsync(
+            ChatOutbox outboxEntry, 
+            CancellationToken cancellationToken = default)
+        {
+            _context.ChatOutbox.Add(outboxEntry);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Created standalone outbox entry {OutboxId} of type {MessageType}", 
+                outboxEntry.Id, outboxEntry.MessageType);
+
+            return outboxEntry;
         }
 
         public async Task<IEnumerable<ChatOutbox>> GetPendingEntriesAsync(
