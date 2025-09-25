@@ -47,7 +47,6 @@ Blazor Front-End
 - Use requirements file found `docs/requirements.csv` for project context and requirements.
 - Use the `docs/*` directory for project documentation.
 
-
 ## 📁 Folder Structure
 
 Use this structure as a guide when creating or updating files:
@@ -56,41 +55,26 @@ Use this structure as a guide when creating or updating files:
 /
   docs/
   containers/
+    extensions/
+    mappings/
+    mssql/
+    service-bus/
   devops/
   src/
-    Ai.Coach/
-      Ai.Coach.App/
-        Ai.Coach.App.ApiService/
-        Ai.Coach.App.ApiService.Tests/
-        Ai.Coach.App.AppHost/
-        Ai.Coach.App.Home/
-        Ai.Coach.App.Home.Tests/
-        Ai.Coach.App.ServiceDefaults/
-        Ai.Coach.App.Web/
-        Ai.Coach.App.Web.Client/
-        Ai.Coach.App.Web.Tests/
-      Ai.Coach.Business/
-        DependencyInjection/
-        Services/
-      Ai.Coach.Business.Tests/
-      Ai.Coach.Common/
-        Connection/
-        Constants/
-        Helpers/
-          Data/
-          Exceptions/
-          Extensions/
-          Filter/
-        Models/
-        Repositories/
-      Ai.Coach.Common.Tests/
-      Ai.Coach.Data/
-        Helpers/
-        Models/
-        Repositories/
-      Ai.Coach.Data.Tests/
-      Ai.Coach.Database/
-      Ai.Coach.Locale/
+    Blazor.Chat.App/
+      Blazor.Chat.App.ApiService/
+        Properties/
+      Blazor.Chat.App.AppHost/
+        Properties/
+      Blazor.Chat.App.Data/
+        Db/
+          Migrations/
+      Blazor.Chat.App.ServiceDefaults/
+      Blazor.Chat.App.Tests/
+      Blazor.Chat.App.Web/
+        Components/
+        Properties/
+        wwwroot/
 ```
 
 ## HTML, CSS, and JavaScript Guidelines
