@@ -1,4 +1,4 @@
-﻿@page "/auth"
+﻿@page "/chat"
 
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
@@ -6,10 +6,9 @@
 @attribute [Authorize]
 @rendermode InteractiveServer
 
-<PageTitle>Auth</PageTitle>
-
-<h1>You are authenticated</h1>
-
+<PageTitle>Chat</PageTitle>
 <AuthorizeView>
-    Hello @context.User.Identity?.Name!
+    Hello @context.User.Identity?.Name! Begin Chatting with your Friends
 </AuthorizeView>
+
+
