@@ -23,7 +23,7 @@ namespace Blazor.Chat.App.Data.Db.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BlazorApp2.Data.ApplicationUser", b =>
+            modelBuilder.Entity("Blazor.Chat.App.Data.Db.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
