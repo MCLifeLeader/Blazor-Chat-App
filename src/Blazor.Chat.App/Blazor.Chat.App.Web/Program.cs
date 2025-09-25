@@ -81,7 +81,6 @@ app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-//    .AddInteractiveWebAssemblyRenderMode()
     ;
 
 app.MapDefaultEndpoints();
