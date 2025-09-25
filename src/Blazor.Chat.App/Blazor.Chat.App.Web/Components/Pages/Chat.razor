@@ -1,0 +1,14 @@
+﻿@page "/chat"
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Chat</PageTitle>
+<AuthorizeView>
+    Hello @context.User.Identity?.Name! Begin Chatting with your Friends
+</AuthorizeView>
+
+
