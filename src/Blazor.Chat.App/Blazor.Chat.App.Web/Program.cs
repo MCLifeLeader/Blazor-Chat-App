@@ -80,9 +80,7 @@ app.UseOutputCache();
 app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-//    .AddInteractiveWebAssemblyRenderMode()
-    ;
+    .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
 
