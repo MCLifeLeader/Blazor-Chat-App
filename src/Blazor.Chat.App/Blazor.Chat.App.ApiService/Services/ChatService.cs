@@ -92,7 +92,9 @@ public class ChatService : IChatService
     {
         var session = await _sqlChatRepository.GetSessionByIdAsync(sessionId, cancellationToken);
         if (session is null)
+        {
             return null;
+        }
 
         var participants = await _sqlChatRepository.GetSessionParticipantsAsync(sessionId, cancellationToken);
         var messageCount = await _sqlChatRepository.GetSessionMessageCountAsync(sessionId, cancellationToken);

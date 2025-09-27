@@ -2,6 +2,9 @@ using Microsoft.OpenApi.Models;
 
 namespace Blazor.Chat.App.ApiService
 {
+    /// <summary>
+    /// 
+    /// </summary>
     internal class ApiInfo
     {
         /// <summary>

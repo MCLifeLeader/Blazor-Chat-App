@@ -139,10 +139,45 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
+// Add fallback to index.html for non-API, non-static requests
+// Only serve index.html for requests that are not for the API (/api) and that do not request a static file (have an extension)
+app.MapWhen(context =>
+{
+    // If path starts with /api, do not map to SPA fallback
+    if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments("/scalar", StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    // If request appears to be for a static file (contains an extension), do not map to SPA fallback
+    var path = context.Request.Path.Value ?? string.Empty;
+    if (!string.IsNullOrEmpty(Path.GetExtension(path)))
+    {
+        return false;
+    }
+
+    return true;
+}, branch =>
+{
+    branch.UseDefaultFiles();
+    branch.UseStaticFiles();
+    branch.Run(async context =>
+    {
+        var index = Path.Combine(app.Environment.WebRootPath, "index.html");
+        if (File.Exists(index))
+        {
+            context.Response.ContentType = "text/html";
+            await context.Response.SendFileAsync(index);
+        }
+        else
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+        }
+    });
+});
+
+
 app.MapDefaultEndpoints();
 
 app.Run();
-
-namespace Blazor.Chat.App.ApiService
-{
-}
