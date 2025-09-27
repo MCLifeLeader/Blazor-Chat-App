@@ -17,6 +17,13 @@ public class ChatService : IChatService
     private readonly IChatCosmosRepository _cosmosRepository;
     private readonly ILogger<ChatService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the ChatService class
+    /// </summary>
+    /// <param name="sqlChatRepository">Repository for SQL Server chat operations</param>
+    /// <param name="outboxRepository">Repository for outbox pattern management</param>
+    /// <param name="cosmosRepository">Repository for Cosmos DB operations</param>
+    /// <param name="logger">Logger instance</param>
     public ChatService(
         ISqlChatRepository sqlChatRepository,
         IOutboxRepository outboxRepository,
@@ -31,6 +38,7 @@ public class ChatService : IChatService
 
     #region Session Operations
 
+    /// <inheritdoc />
     public async Task<ChatSessionDto> CreateSessionAsync(CreateSessionDto createSessionDto, string createdByUserId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Creating new chat session '{Title}' for user {UserId}", createSessionDto.Title, createdByUserId);
@@ -79,6 +87,7 @@ public class ChatService : IChatService
         return MapToSessionDto(createdSession, createSessionDto.InitialParticipantIds.Count + 1, 0);
     }
 
+    /// <inheritdoc />
     public async Task<ChatSessionDto?> GetSessionAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         var session = await _sqlChatRepository.GetSessionByIdAsync(sessionId, cancellationToken);
@@ -91,6 +100,7 @@ public class ChatService : IChatService
         return MapToSessionDto(session, participants.Count(), messageCount);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatSessionDto>> GetUserSessionsAsync(string userId, CancellationToken cancellationToken = default)
     {
         var sessions = await _sqlChatRepository.GetSessionsByUserIdAsync(userId, cancellationToken);
@@ -110,6 +120,7 @@ public class ChatService : IChatService
 
     #region Message Operations
 
+    /// <inheritdoc />
     public async Task<MessageOperationResponseDto> AddMessageAsync(Guid sessionId, AddMessageDto addMessageDto, string senderUserId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Adding message to session {SessionId} from user {UserId}", sessionId, senderUserId);
@@ -186,6 +197,7 @@ public class ChatService : IChatService
         };
     }
 
+    /// <inheritdoc />
     public async Task<ChatMessagesPageDto> GetSessionMessagesAsync(Guid sessionId, int page = 1, int pageSize = 50, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Getting messages for session {SessionId}, page {Page}, pageSize {PageSize}", sessionId, page, pageSize);
@@ -231,6 +243,7 @@ public class ChatService : IChatService
         };
     }
 
+    /// <inheritdoc />
     public async Task<MessageOperationResponseDto> EditMessageAsync(Guid sessionId, Guid messageId, EditMessageDto editMessageDto, string userId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Editing message {MessageId} in session {SessionId} by user {UserId}", messageId, sessionId, userId);
@@ -310,6 +323,7 @@ public class ChatService : IChatService
         };
     }
 
+    /// <inheritdoc />
     public async Task<MessageOperationResponseDto> DeleteMessageAsync(Guid sessionId, Guid messageId, string userId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Deleting message {MessageId} in session {SessionId} by user {UserId}", messageId, sessionId, userId);
@@ -358,6 +372,7 @@ public class ChatService : IChatService
 
     #region Participant Operations
 
+    /// <inheritdoc />
     public async Task<ChatParticipantDto> AddParticipantAsync(Guid sessionId, AddParticipantDto addParticipantDto, CancellationToken cancellationToken = default)
     {
         var participant = new ChatParticipant
@@ -382,6 +397,7 @@ public class ChatService : IChatService
         };
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatParticipantDto>> GetSessionParticipantsAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         var participants = await _sqlChatRepository.GetSessionParticipantsAsync(sessionId, cancellationToken);
@@ -401,6 +417,7 @@ public class ChatService : IChatService
         });
     }
 
+    /// <inheritdoc />
     public async Task RemoveParticipantAsync(Guid sessionId, string userId, CancellationToken cancellationToken = default)
     {
         var participant = await _sqlChatRepository.GetParticipantAsync(sessionId, userId, cancellationToken);
@@ -414,6 +431,7 @@ public class ChatService : IChatService
 
     #region Utility Operations
 
+    /// <inheritdoc />
     public async Task<bool> IsUserParticipantAsync(Guid sessionId, string userId, CancellationToken cancellationToken = default)
     {
         return await _sqlChatRepository.IsUserParticipantAsync(sessionId, userId, cancellationToken);
@@ -423,6 +441,13 @@ public class ChatService : IChatService
 
     #region Mapping Methods
 
+    /// <summary>
+    /// Maps a ChatSession entity to a ChatSessionDto
+    /// </summary>
+    /// <param name="session">The session entity to map</param>
+    /// <param name="participantCount">Number of participants in the session</param>
+    /// <param name="messageCount">Number of messages in the session</param>
+    /// <returns>Mapped session DTO</returns>
     private static ChatSessionDto MapToSessionDto(ChatSession session, int participantCount, int messageCount)
     {
         return new ChatSessionDto
@@ -440,6 +465,11 @@ public class ChatService : IChatService
         };
     }
 
+    /// <summary>
+    /// Maps a Cosmos DB message document to a ChatMessageDto
+    /// </summary>
+    /// <param name="doc">The Cosmos message document to map</param>
+    /// <returns>Mapped message DTO</returns>
     private static ChatMessageDto MapFromCosmosDocument(CosmosMessageDocument doc)
     {
         return new ChatMessageDto
@@ -467,6 +497,11 @@ public class ChatService : IChatService
         };
     }
 
+    /// <summary>
+    /// Maps a SQL ChatMessage entity to a ChatMessageDto
+    /// </summary>
+    /// <param name="message">The SQL message entity to map</param>
+    /// <returns>Mapped message DTO</returns>
     private static ChatMessageDto MapFromSqlMessage(ChatMessage message)
     {
         return new ChatMessageDto
@@ -488,6 +523,12 @@ public class ChatService : IChatService
         };
     }
 
+    /// <summary>
+    /// Truncates content to create a preview string
+    /// </summary>
+    /// <param name="content">The content to truncate</param>
+    /// <param name="maxLength">Maximum length for the preview</param>
+    /// <returns>Truncated content with ellipsis if needed</returns>
     private static string TruncateToPreview(string content, int maxLength = 500)
     {
         if (content.Length <= maxLength)

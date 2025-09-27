@@ -12,6 +12,11 @@ public class SqlChatRepository : ISqlChatRepository
     private readonly ApplicationDbContext _context;
     private readonly ILogger<SqlChatRepository> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the SqlChatRepository class
+    /// </summary>
+    /// <param name="context">Database context for Entity Framework operations</param>
+    /// <param name="logger">Logger instance</param>
     public SqlChatRepository(ApplicationDbContext context, ILogger<SqlChatRepository> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -20,6 +25,7 @@ public class SqlChatRepository : ISqlChatRepository
 
     #region Session Operations
 
+    /// <inheritdoc />
     public async Task<ChatSession> CreateSessionAsync(ChatSession session, CancellationToken cancellationToken = default)
     {
         _context.ChatSessions.Add(session);
@@ -29,6 +35,7 @@ public class SqlChatRepository : ISqlChatRepository
         return session;
     }
 
+    /// <inheritdoc />
     public async Task<ChatSession?> GetSessionByIdAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatSessions
@@ -36,6 +43,8 @@ public class SqlChatRepository : ISqlChatRepository
             .FirstOrDefaultAsync(s => s.Id == sessionId, cancellationToken);
     }
 
+    /// <inheritdoc />
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatSession>> GetSessionsByUserIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatSessions
@@ -45,6 +54,7 @@ public class SqlChatRepository : ISqlChatRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<ChatSession> UpdateSessionAsync(ChatSession session, CancellationToken cancellationToken = default)
     {
         _context.ChatSessions.Update(session);
@@ -58,6 +68,7 @@ public class SqlChatRepository : ISqlChatRepository
 
     #region Participant Operations
 
+    /// <inheritdoc />
     public async Task<ChatParticipant> AddParticipantAsync(ChatParticipant participant, CancellationToken cancellationToken = default)
     {
         _context.ChatParticipants.Add(participant);
@@ -67,6 +78,7 @@ public class SqlChatRepository : ISqlChatRepository
         return participant;
     }
 
+    /// <inheritdoc />
     public async Task<ChatParticipant?> GetParticipantAsync(Guid sessionId, string userId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatParticipants
@@ -74,6 +86,7 @@ public class SqlChatRepository : ISqlChatRepository
             .FirstOrDefaultAsync(p => p.SessionId == sessionId && p.UserId == userId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatParticipant>> GetSessionParticipantsAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatParticipants
@@ -83,6 +96,7 @@ public class SqlChatRepository : ISqlChatRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task RemoveParticipantAsync(Guid participantId, CancellationToken cancellationToken = default)
     {
         var participant = await _context.ChatParticipants.FindAsync(new object[] { participantId }, cancellationToken);
@@ -95,6 +109,7 @@ public class SqlChatRepository : ISqlChatRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<ChatParticipant> UpdateParticipantAsync(ChatParticipant participant, CancellationToken cancellationToken = default)
     {
         _context.ChatParticipants.Update(participant);
@@ -108,6 +123,7 @@ public class SqlChatRepository : ISqlChatRepository
 
     #region Message Operations
 
+    /// <inheritdoc />
     public async Task<(ChatMessage message, ChatOutbox outboxEntry)> SaveMessageWithOutboxAsync(
         ChatMessage message, 
         ChatOutbox outboxEntry, 
@@ -145,6 +161,7 @@ public class SqlChatRepository : ISqlChatRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<ChatMessage?> GetMessageByIdAsync(Guid messageId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatMessages
@@ -153,6 +170,7 @@ public class SqlChatRepository : ISqlChatRepository
             .FirstOrDefaultAsync(m => m.Id == messageId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatMessage>> GetSessionMessagesAsync(
         Guid sessionId, 
         int skip = 0, 
@@ -169,12 +187,14 @@ public class SqlChatRepository : ISqlChatRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<int> GetSessionMessageCountAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatMessages
             .CountAsync(m => m.SessionId == sessionId && m.MessageStatus != ChatMessageStatus.Deleted, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<ChatMessage> UpdateMessageStatusAsync(Guid messageId, ChatMessageStatus status, CancellationToken cancellationToken = default)
     {
         var message = await _context.ChatMessages.FindAsync(new object[] { messageId }, cancellationToken);
@@ -194,12 +214,14 @@ public class SqlChatRepository : ISqlChatRepository
 
     #region User Operations
 
+    /// <inheritdoc />
     public async Task<bool> IsUserParticipantAsync(Guid sessionId, string userId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatParticipants
             .AnyAsync(p => p.SessionId == sessionId && p.UserId == userId && p.LeftAt == null, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<string>> GetSessionParticipantUserIdsAsync(Guid sessionId, CancellationToken cancellationToken = default)
     {
         return await _context.ChatParticipants

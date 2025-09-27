@@ -12,12 +12,18 @@ public class OutboxRepository : IOutboxRepository
     private readonly ApplicationDbContext _context;
     private readonly ILogger<OutboxRepository> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the OutboxRepository class
+    /// </summary>
+    /// <param name="context">Database context for Entity Framework operations</param>
+    /// <param name="logger">Logger instance</param>
     public OutboxRepository(ApplicationDbContext context, ILogger<OutboxRepository> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <inheritdoc />
     public async Task<ChatOutbox> CreateOutboxEntryAsync(
         ChatOutbox outboxEntry, 
         CancellationToken cancellationToken = default)
@@ -31,6 +37,7 @@ public class OutboxRepository : IOutboxRepository
         return outboxEntry;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatOutbox>> GetPendingEntriesAsync(
         int maxCount = 100, 
         CancellationToken cancellationToken = default)
@@ -42,6 +49,7 @@ public class OutboxRepository : IOutboxRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<bool> MarkAsProcessingAsync(
         Guid outboxId, 
         CancellationToken cancellationToken = default)
@@ -61,6 +69,7 @@ public class OutboxRepository : IOutboxRepository
         return true;
     }
 
+    /// <inheritdoc />
     public async Task MarkAsCompletedAsync(
         Guid outboxId, 
         CancellationToken cancellationToken = default)
@@ -77,6 +86,7 @@ public class OutboxRepository : IOutboxRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task MarkAsFailedAsync(
         Guid outboxId, 
         string errorMessage, 
@@ -96,6 +106,7 @@ public class OutboxRepository : IOutboxRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task MarkAsDeadLetterAsync(
         Guid outboxId, 
         string finalError, 
@@ -113,6 +124,7 @@ public class OutboxRepository : IOutboxRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<ChatOutbox>> GetEntriesReadyForRetryAsync(
         int maxCount = 100, 
         CancellationToken cancellationToken = default)
@@ -126,6 +138,7 @@ public class OutboxRepository : IOutboxRepository
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<OutboxStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default)
     {
         var stats = await _context.ChatOutbox
