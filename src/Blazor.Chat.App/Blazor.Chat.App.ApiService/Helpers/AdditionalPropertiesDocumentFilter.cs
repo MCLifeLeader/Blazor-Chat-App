@@ -1,22 +1,21 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Blazor.Chat.App.ApiService.Helpers
+namespace Blazor.Chat.App.ApiService.Helpers;
+
+public class AdditionalPropertiesDocumentFilter : IDocumentFilter
 {
-    public class AdditionalPropertiesDocumentFilter : IDocumentFilter
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="openApiDoc"></param>
+    /// <param name="context"></param>
+    public void Apply(OpenApiDocument openApiDoc, DocumentFilterContext context)
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="openApiDoc"></param>
-        /// <param name="context"></param>
-        public void Apply(OpenApiDocument openApiDoc, DocumentFilterContext context)
+        foreach (var schema in context.SchemaRepository.Schemas
+                     .Where(schema => schema.Value.AdditionalProperties is null))
         {
-            foreach (var schema in context.SchemaRepository.Schemas
-                         .Where(schema => schema.Value.AdditionalProperties is null))
-            {
-                schema.Value.AdditionalPropertiesAllowed = true;
-            }
+            schema.Value.AdditionalPropertiesAllowed = true;
         }
     }
 }
