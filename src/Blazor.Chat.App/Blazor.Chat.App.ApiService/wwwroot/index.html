@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Chat API Service Documentation</title>
+    <script>
+        document.addEventListener("DOMContentLoaded",
+            function() {
+                fetch("/api/Info/Version")
+                    .then(response => response.text())
+                    .then(version => {
+                        document.getElementById("api-version").textContent = version;
+                    })
+                    .catch(error => {
+                        document.getElementById("api-version").textContent = "Error loading version";
+                    });
+            });
+    </script>
+</head>
+<body>
+    <h1>Chat API Service Documentation</h1>
+    <h2>App Version: <span id="api-version">Loading...</span></h2>
+    <ul>
+        <li><a href="/swagger">Swagger UI</a></li>
+        <li><a href="/scalar">Scalar UI</a></li>
+    </ul>
+</body>
+</html>
