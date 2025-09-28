@@ -11,13 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.ApiService"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Web", "src\Blazor.Chat.App\Blazor.Chat.App.Web\Blazor.Chat.App.Web.csproj", "{34DEC40A-4D82-590D-F3C2-2CD37AE96DFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Web.Tests", "src\Blazor.Chat.App\Blazor.Chat.App.Tests\Blazor.Chat.App.Web.Tests.csproj", "{08293ED8-456C-E8A0-AB6C-36EEC26264AD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Data", "src\Blazor.Chat.App\Blazor.Chat.App.Data\Blazor.Chat.App.Data.csproj", "{05122283-2EB4-4073-873C-A6DF56F98EAD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.ApiService.Tests", "src\Blazor.Chat.App\Blazor.Chat.App.ApiService.Tests\Blazor.Chat.App.ApiService.Tests.csproj", "{869127AB-D099-4FE0-8EE9-EF241E16A0DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Data.Tests", "src\Blazor.Chat.App\Blazor.Chap.App.Data.Tests\Blazor.Chat.App.Data.Tests.csproj", "{A20188D3-4BED-4276-956B-6A22B88298EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Data.Tests", "src\Blazor.Chat.App\Blazor.Chat.App.Data.Tests\Blazor.Chat.App.Data.Tests.csproj", "{A20188D3-4BED-4276-956B-6A22B88298EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Chat.App.Web.Tests", "src\Blazor.Chat.App\Blazor.Chat.App.Web.Tests\Blazor.Chat.App.Web.Tests.csproj", "{ACE4D5C0-E884-4087-5C15-80A5EA5555F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,6 @@ Global
 		{34DEC40A-4D82-590D-F3C2-2CD37AE96DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34DEC40A-4D82-590D-F3C2-2CD37AE96DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34DEC40A-4D82-590D-F3C2-2CD37AE96DFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08293ED8-456C-E8A0-AB6C-36EEC26264AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05122283-2EB4-4073-873C-A6DF56F98EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +53,10 @@ Global
 		{A20188D3-4BED-4276-956B-6A22B88298EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A20188D3-4BED-4276-956B-6A22B88298EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A20188D3-4BED-4276-956B-6A22B88298EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE4D5C0-E884-4087-5C15-80A5EA5555F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE4D5C0-E884-4087-5C15-80A5EA5555F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE4D5C0-E884-4087-5C15-80A5EA5555F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE4D5C0-E884-4087-5C15-80A5EA5555F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
