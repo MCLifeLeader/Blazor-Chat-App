@@ -52,7 +52,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(e => e.Session)
                 .WithMany(s => s.Participants)
                 .HasForeignKey(e => e.SessionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); // changed from Cascade to Restrict to avoid multiple cascade paths
 
             entity.HasOne(e => e.User)
                 .WithMany()

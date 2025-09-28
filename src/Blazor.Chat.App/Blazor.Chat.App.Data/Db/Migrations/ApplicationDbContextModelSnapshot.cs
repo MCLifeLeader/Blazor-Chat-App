@@ -263,7 +263,7 @@ namespace Blazor.Chat.App.Data.Db.Migrations
                     b.Property<string>("TenantId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Title")
+                    b.Property<string>(("Title"))
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -456,7 +456,7 @@ namespace Blazor.Chat.App.Data.Db.Migrations
                     b.HasOne("Blazor.Chat.App.Data.Db.ChatSession", "Session")
                         .WithMany("Participants")
                         .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict) // updated from Cascade to Restrict
                         .IsRequired();
 
                     b.HasOne("Blazor.Chat.App.Data.Db.ApplicationUser", "User")

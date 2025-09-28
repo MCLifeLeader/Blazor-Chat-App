@@ -11,25 +11,6 @@ public partial class AddChatEntities : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserClaims_ApplicationUser_UserId",
-            table: "AspNetUserClaims");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserLogins_ApplicationUser_UserId",
-            table: "AspNetUserLogins");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserRoles_ApplicationUser_UserId",
-            table: "AspNetUserRoles");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserTokens_ApplicationUser_UserId",
-            table: "AspNetUserTokens");
-
-        migrationBuilder.DropTable(
-            name: "ApplicationUser");
-
         migrationBuilder.CreateTable(
             name: "ChatOutbox",
             columns: table => new
@@ -154,7 +135,7 @@ public partial class AddChatEntities : Migration
                     column: x => x.SessionId,
                     principalTable: "ChatSessions",
                     principalColumn: "Id",
-                    onDelete: ReferentialAction.Cascade);
+                    onDelete: ReferentialAction.Restrict);
             });
 
         migrationBuilder.CreateIndex(
@@ -233,59 +214,11 @@ public partial class AddChatEntities : Migration
             name: "IX_ChatSessions_TenantId_State",
             table: "ChatSessions",
             columns: new[] { "TenantId", "State" });
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-            table: "AspNetUserClaims",
-            column: "UserId",
-            principalTable: "AspNetUsers",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-            table: "AspNetUserLogins",
-            column: "UserId",
-            principalTable: "AspNetUsers",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-            table: "AspNetUserRoles",
-            column: "UserId",
-            principalTable: "AspNetUsers",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-            table: "AspNetUserTokens",
-            column: "UserId",
-            principalTable: "AspNetUsers",
-            principalColumn: "Id",
-            onDelete: ReferentialAction.Cascade);
     }
 
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-            table: "AspNetUserClaims");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-            table: "AspNetUserLogins");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-            table: "AspNetUserRoles");
-
-        migrationBuilder.DropForeignKey(
-            name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-            table: "AspNetUserTokens");
-
         migrationBuilder.DropTable(
             name: "ChatParticipants");
 
@@ -297,54 +230,5 @@ public partial class AddChatEntities : Migration
 
         migrationBuilder.DropTable(
             name: "ChatSessions");
-
-        migrationBuilder.CreateTable(
-            name: "ApplicationUser",
-            columns: table => new
-            {
-                TempId1 = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                TempId2 = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                TempId3 = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                TempId4 = table.Column<string>(type: "nvarchar(450)", nullable: false)
-            },
-            constraints: table =>
-            {
-                table.UniqueConstraint("AK_ApplicationUser_TempId1", x => x.TempId1);
-                table.UniqueConstraint("AK_ApplicationUser_TempId2", x => x.TempId2);
-                table.UniqueConstraint("AK_ApplicationUser_TempId3", x => x.TempId3);
-                table.UniqueConstraint("AK_ApplicationUser_TempId4", x => x.TempId4);
-            });
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserClaims_ApplicationUser_UserId",
-            table: "AspNetUserClaims",
-            column: "UserId",
-            principalTable: "ApplicationUser",
-            principalColumn: "TempId1",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserLogins_ApplicationUser_UserId",
-            table: "AspNetUserLogins",
-            column: "UserId",
-            principalTable: "ApplicationUser",
-            principalColumn: "TempId2",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserRoles_ApplicationUser_UserId",
-            table: "AspNetUserRoles",
-            column: "UserId",
-            principalTable: "ApplicationUser",
-            principalColumn: "TempId3",
-            onDelete: ReferentialAction.Cascade);
-
-        migrationBuilder.AddForeignKey(
-            name: "FK_AspNetUserTokens_ApplicationUser_UserId",
-            table: "AspNetUserTokens",
-            column: "UserId",
-            principalTable: "ApplicationUser",
-            principalColumn: "TempId4",
-            onDelete: ReferentialAction.Cascade);
     }
 }
