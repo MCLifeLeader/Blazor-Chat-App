@@ -1,4 +1,4 @@
-﻿namespace Blazor.Chap.App.Data.Tests
+﻿namespace Blazor.Chat.App.Data.Tests
 {
     public class Tests
     {

@@ -1,7 +1,8 @@
 using Blazor.Chat.App.ApiService.Models;
+using Blazor.Chat.App.Data.Cosmos.Repositories;
 using Blazor.Chat.App.Data.Db;
-using Blazor.Chat.App.Data.Repositories;
-using Blazor.Chat.App.ServiceDefaults.Repositories;
+using Blazor.Chat.App.Data.Sql;
+using Blazor.Chat.App.Data.Sql.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 

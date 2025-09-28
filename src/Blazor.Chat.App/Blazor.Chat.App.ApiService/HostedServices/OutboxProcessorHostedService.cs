@@ -1,6 +1,7 @@
-using Blazor.Chat.App.Data.Repositories;
-using Blazor.Chat.App.ServiceDefaults.Configuration;
-using Blazor.Chat.App.ServiceDefaults.Repositories;
+using Blazor.Chat.App.Data.Cosmos.Configuration;
+using Blazor.Chat.App.Data.Cosmos.Repositories;
+using Blazor.Chat.App.Data.Sql;
+using Blazor.Chat.App.Data.Sql.Repositories;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
@@ -92,7 +93,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the processing work</returns>
     private async Task ProcessSingleEntryAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IOutboxRepository outboxRepository,
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
@@ -133,7 +134,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the processing work</returns>
     private async Task ProcessOutboxEntryByTypeAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
@@ -167,7 +168,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the processing work</returns>
     private async Task ProcessMessageEventAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
@@ -191,7 +192,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the processing work</returns>
     private async Task ProcessMessageDeletionAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
@@ -212,7 +213,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the processing work</returns>
     private async Task ProcessSessionSnapshotAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
@@ -234,7 +235,7 @@ public class OutboxProcessorHostedService : BackgroundService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the error handling work</returns>
     private async Task HandleProcessingErrorAsync(
-        Data.Db.ChatOutbox entry,
+        ChatOutbox entry,
         IOutboxRepository outboxRepository,
         string errorMessage,
         CancellationToken cancellationToken)

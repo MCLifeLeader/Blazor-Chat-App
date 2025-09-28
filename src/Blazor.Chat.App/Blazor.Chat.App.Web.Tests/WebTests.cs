@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Blazor.Chat.App.Tests;
+namespace Blazor.Chat.App.Web.Tests;
 
 public class WebTests
 {
