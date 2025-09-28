@@ -39,4 +39,9 @@ public class OutboxProcessorOptions
     /// Whether the outbox processor is enabled
     /// </summary>
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Processing interval in milliseconds (computed from ProcessingIntervalSeconds)
+    /// </summary>
+    public int ProcessingIntervalMs => ProcessingIntervalSeconds * 1000;
 }

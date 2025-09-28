@@ -7,10 +7,23 @@ using Scalar.AspNetCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
 
+using Microsoft.AspNetCore.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
+
+// Add chat services
+builder.Services.AddChatServices(builder.Configuration);
+
+// Add MVC controllers
+builder.Services.AddControllers();
+
+// Add authentication and authorization
+builder.Services.AddAuthentication()
+    .AddBearerToken(IdentityConstants.BearerScheme);
+builder.Services.AddAuthorizationBuilder();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -93,6 +106,9 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
+// Initialize Cosmos DB
+await RegisterDependentServices.InitializeCosmosDbAsync(app.Services);
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -112,6 +128,13 @@ app.MapScalarApiReference();
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
+
+// Add authentication and authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map controllers
+app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {

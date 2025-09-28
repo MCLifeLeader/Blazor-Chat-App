@@ -195,6 +195,49 @@ public class ChatCosmosRepository : IChatCosmosRepository
         }
     }
 
+    /// <inheritdoc />
+    public async Task DeleteMessageAsync(
+        Guid messageId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _container.DeleteItemAsync<CosmosMessageDocument>(
+                messageId.ToString(),
+                new PartitionKey(sessionId.ToString()),
+                cancellationToken: cancellationToken);
+
+            _logger.LogDebug("Deleted message {MessageId} from session {SessionId}, RU consumed: {RU}",
+                messageId, sessionId, response.RequestCharge);
+        }
+        catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning("Message {MessageId} not found in Cosmos DB", messageId);
+            // Don't throw - message might not have been synced yet
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task UpsertSessionSnapshotAsync(
+        object snapshotData,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _container.UpsertItemAsync(
+                snapshotData,
+                cancellationToken: cancellationToken);
+
+            _logger.LogDebug("Upserted session snapshot, RU consumed: {RU}", response.RequestCharge);
+        }
+        catch (CosmosException ex)
+        {
+            _logger.LogError(ex, "Failed to upsert session snapshot");
+            throw;
+        }
+    }
+
     public async Task UpsertSessionSnapshotAsync(
         CosmosSessionSnapshot snapshot,
         CancellationToken cancellationToken = default)

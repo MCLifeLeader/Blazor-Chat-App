@@ -65,4 +65,18 @@ public interface IChatCosmosRepository
     Task BulkUpsertMessagesAsync(
         IEnumerable<CosmosMessageDocument> messages,
         CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Delete a message document from Cosmos DB
+    /// </summary>
+    Task DeleteMessageAsync(
+        Guid messageId,
+        Guid sessionId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Upsert a session snapshot document
+    /// </summary>
+    Task UpsertSessionSnapshotAsync(
+        object snapshotData,
+        CancellationToken cancellationToken = default);
 }
