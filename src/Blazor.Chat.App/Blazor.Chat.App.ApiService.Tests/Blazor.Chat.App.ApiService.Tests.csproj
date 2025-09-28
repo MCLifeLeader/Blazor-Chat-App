@@ -30,6 +30,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Blazor.Chat.App.ApiService\Blazor.Chat.App.ApiService.csproj" />
     <ProjectReference Include="..\Blazor.Chat.App.AppHost\Blazor.Chat.App.AppHost.csproj" />
+    <ProjectReference Include="..\Blazor.Chat.App.Data\Blazor.Chat.App.Data.csproj" />
+    <ProjectReference Include="..\Blazor.Chat.App.ServiceDefaults\Blazor.Chat.App.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
