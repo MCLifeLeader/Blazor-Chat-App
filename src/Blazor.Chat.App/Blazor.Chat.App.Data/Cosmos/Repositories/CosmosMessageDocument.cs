@@ -7,7 +7,7 @@ public record CosmosMessageDocument
 {
     public string id { get; init; } = string.Empty; // Cosmos DB id (messageId)
     public Guid sessionId { get; init; }
-    public Guid senderUserId { get; init; }
+    public string senderUserId { get; init; } = string.Empty; // Changed from Guid to string to match ChatParticipant.UserId
     public string senderDisplayName { get; init; } = string.Empty;
     public DateTime sentAt { get; init; }
     public MessageBody body { get; init; } = new();

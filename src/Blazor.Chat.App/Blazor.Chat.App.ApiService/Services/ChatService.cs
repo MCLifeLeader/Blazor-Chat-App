@@ -60,9 +60,11 @@ public class ChatService : IChatService
         // Add creator as participant
         var creatorParticipant = new ChatParticipant
         {
+            Id = Guid.NewGuid(),
             SessionId = createdSession.Id,
             UserId = createdByUserId,
-            Role = ChatParticipantRole.Owner
+            Role = ChatParticipantRole.Owner,
+            JoinedAt = DateTime.UtcNow
         };
 
         await _sqlChatRepository.AddParticipantAsync(creatorParticipant, cancellationToken);
@@ -156,7 +158,7 @@ public class ChatService : IChatService
         {
             id = messageId.ToString(),
             sessionId = sessionId,
-            senderUserId = Guid.Parse(senderUserId),
+            senderUserId = senderUserId, // Now string instead of Guid
             sentAt = message.SentAt,
             body = new MessageBody
             {
