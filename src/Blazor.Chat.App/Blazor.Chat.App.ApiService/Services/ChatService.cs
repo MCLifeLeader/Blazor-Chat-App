@@ -42,6 +42,12 @@ public class ChatService : IChatService
     /// <inheritdoc />
     public async Task<ChatSessionDto> CreateSessionAsync(CreateSessionDto createSessionDto, string createdByUserId, CancellationToken cancellationToken = default)
     {
+        // Validate input DTO
+        if (createSessionDto is null)
+        {
+            throw new ArgumentNullException(nameof(createSessionDto));
+        }
+
         _logger.LogInformation("Creating new chat session '{Title}' for user {UserId}", createSessionDto.Title, createdByUserId);
 
         var session = new ChatSession
@@ -69,8 +75,11 @@ public class ChatService : IChatService
 
         await _sqlChatRepository.AddParticipantAsync(creatorParticipant, cancellationToken);
 
+        // Ensure initial participants list is not null
+        var initialParticipantIds = createSessionDto.InitialParticipantIds ?? new List<string>();
+
         // Add initial participants
-        foreach (var userId in createSessionDto.InitialParticipantIds)
+        foreach (var userId in initialParticipantIds)
         {
             if (userId != createdByUserId) // Don't add creator twice
             {
@@ -85,9 +94,9 @@ public class ChatService : IChatService
         }
 
         _logger.LogInformation("Created chat session {SessionId} with {ParticipantCount} participants", 
-            createdSession.Id, createSessionDto.InitialParticipantIds.Count + 1);
+            createdSession.Id, initialParticipantIds.Count + 1);
 
-        return MapToSessionDto(createdSession, createSessionDto.InitialParticipantIds.Count + 1, 0);
+        return MapToSessionDto(createdSession, initialParticipantIds.Count + 1, 0);
     }
 
     /// <inheritdoc />
