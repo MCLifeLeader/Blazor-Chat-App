@@ -171,14 +171,14 @@ public class OutboxProcessorHostedService : BackgroundService
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
-        var messageDocument = JsonSerializer.Deserialize<CosmosMessageDocument>(entry.Payload);
+        var messageDocument = JsonSerializer.Deserialize<CosmosMessageDocument>(entry.PayloadJson);
         if (messageDocument == null)
         {
             throw new InvalidOperationException($"Failed to deserialize message payload for outbox entry {entry.Id}");
         }
 
         // Ensure outbox ID is set for idempotency
-        messageDocument.OutboxId = entry.Id;
+        messageDocument = messageDocument with { outboxId = entry.Id };
 
         await cosmosRepository.UpsertMessageAsync(messageDocument, cancellationToken);
     }
@@ -195,7 +195,7 @@ public class OutboxProcessorHostedService : BackgroundService
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
-        var deleteData = JsonSerializer.Deserialize<MessageDeleteData>(entry.Payload);
+        var deleteData = JsonSerializer.Deserialize<MessageDeleteData>(entry.PayloadJson);
         if (deleteData == null)
         {
             throw new InvalidOperationException($"Failed to deserialize deletion payload for outbox entry {entry.Id}");
@@ -216,7 +216,7 @@ public class OutboxProcessorHostedService : BackgroundService
         IChatCosmosRepository cosmosRepository,
         CancellationToken cancellationToken)
     {
-        var snapshotData = JsonSerializer.Deserialize<SessionSnapshotData>(entry.Payload);
+        var snapshotData = JsonSerializer.Deserialize<SessionSnapshotData>(entry.PayloadJson);
         if (snapshotData == null)
         {
             throw new InvalidOperationException($"Failed to deserialize snapshot payload for outbox entry {entry.Id}");

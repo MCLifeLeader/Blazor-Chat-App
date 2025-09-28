@@ -74,7 +74,7 @@ public class ChatController : ControllerBase
         try
         {
             var userId = GetCurrentUserId();
-            var session = await _chatService.GetSessionAsync(sessionId, userId, cancellationToken);
+            var session = await _chatService.GetSessionAsync(sessionId, cancellationToken);
             
             if (session == null)
             {
@@ -148,7 +148,7 @@ public class ChatController : ControllerBase
             if (pageSize < 1 || pageSize > 100) pageSize = 50;
 
             var userId = GetCurrentUserId();
-            var messages = await _chatService.GetSessionMessagesAsync(sessionId, userId, page, pageSize, cancellationToken);
+            var messages = await _chatService.GetSessionMessagesAsync(sessionId, page, pageSize, cancellationToken);
             
             return Ok(messages);
         }
@@ -181,7 +181,7 @@ public class ChatController : ControllerBase
         try
         {
             var userId = GetCurrentUserId();
-            var response = await _chatService.EditMessageAsync(messageId, request, userId, cancellationToken);
+            var response = await _chatService.EditMessageAsync(sessionId, messageId, request, userId, cancellationToken);
             
             _logger.LogInformation("Edited message {MessageId} in session {SessionId}", messageId, sessionId);
             return Ok(response);
@@ -218,7 +218,7 @@ public class ChatController : ControllerBase
         try
         {
             var userId = GetCurrentUserId();
-            var response = await _chatService.DeleteMessageAsync(messageId, userId, cancellationToken);
+            var response = await _chatService.DeleteMessageAsync(sessionId, messageId, userId, cancellationToken);
             
             _logger.LogInformation("Deleted message {MessageId} from session {SessionId}", messageId, sessionId);
             return Ok(response);
@@ -255,7 +255,7 @@ public class ChatController : ControllerBase
         try
         {
             var userId = GetCurrentUserId();
-            var participant = await _chatService.AddParticipantAsync(sessionId, request, userId, cancellationToken);
+            var participant = await _chatService.AddParticipantAsync(sessionId, request, cancellationToken);
             
             _logger.LogInformation("Added participant {ParticipantUserId} to session {SessionId}", request.UserId, sessionId);
             return Ok(participant);
@@ -317,13 +317,13 @@ public class ChatController : ControllerBase
     /// Get current user ID from claims
     /// </summary>
     /// <returns>User ID</returns>
-    private Guid GetCurrentUserId()
+    private string GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        if (string.IsNullOrEmpty(userIdClaim))
         {
             throw new UnauthorizedAccessException("User ID not found in claims");
         }
-        return userId;
+        return userIdClaim;
     }
 }
