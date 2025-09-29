@@ -1,0 +1,175 @@
+@using Blazor.Chat.App.ApiService.Models
+@using System.ComponentModel.DataAnnotations
+
+<div class="chat-composer" data-testid="chat-composer">
+    <EditForm Model="@messageModel" OnValidSubmit="@SendMessage" FormName="MessageForm">
+        <DataAnnotationsValidator />
+        
+        <div class="composer-main">
+            <div class="message-input-container">
+                <InputTextArea @bind-Value="messageModel.Content" 
+                              class="message-input" 
+                              placeholder="Type your message..." 
+                              rows="1"
+                              data-testid="message-input"
+                              @onkeypress="@HandleKeyPress" />
+                <ValidationMessage For="() => messageModel.Content" class="text-danger" />
+            </div>
+            
+            <div class="composer-actions">
+                <button type="button" 
+                        class="btn-attachment" 
+                        @onclick="@ToggleAttachments"
+                        data-testid="attachment-btn"
+                        disabled="@IsLoading">
+                    📎
+                </button>
+                
+                <button type="submit" 
+                        class="btn-send" 
+                        disabled="@(IsLoading || string.IsNullOrWhiteSpace(messageModel.Content))"
+                        data-testid="send-btn">
+                    @if (IsLoading)
+                    {
+                        <span class="spinner-sm"></span>
+                    }
+                    else
+                    {
+                        <span>Send</span>
+                    }
+                </button>
+            </div>
+        </div>
+
+        @if (showAttachments)
+        {
+            <div class="attachments-section" data-testid="attachments-section">
+                <div class="attachments-header">
+                    <h4>Attachments</h4>
+                    <button type="button" @onclick="@ToggleAttachments" class="btn-close-attachments">×</button>
+                </div>
+                
+                <InputFile multiple OnChange="@HandleFileSelection" class="file-input" data-testid="file-input" />
+                
+                @if (pendingAttachments?.Any() == true)
+                {
+                    <div class="pending-attachments">
+                        @foreach (var attachment in pendingAttachments)
+                        {
+                            <div class="attachment-preview" data-testid="attachment-preview">
+                                <span class="attachment-name">@attachment.FileName</span>
+                                <span class="attachment-size">(@FormatFileSize(attachment.Size))</span>
+                                <button type="button" 
+                                        @onclick="() => RemoveAttachment(attachment)" 
+                                        class="btn-remove-attachment"
+                                        data-testid="remove-attachment-btn">×</button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </EditForm>
+    
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="error-message" data-testid="error-message">
+            @ErrorMessage
+        </div>
+    }
+</div>
+
+@code {
+    private MessageInputModel messageModel = new();
+    private bool showAttachments = false;
+    private List<MessageAttachmentDto> pendingAttachments = new();
+    private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
+    private const int MaxFiles = 5;
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public EventCallback<AddMessageDto> OnSendMessage { get; set; }
+
+    private class MessageInputModel
+    {
+        [Required(ErrorMessage = "Message content is required")]
+        [StringLength(2000, ErrorMessage = "Message cannot exceed 2000 characters")]
+        public string Content { get; set; } = string.Empty;
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(messageModel.Content))
+            return;
+
+        var addMessageDto = new AddMessageDto
+        {
+            Content = messageModel.Content.Trim(),
+            Attachments = pendingAttachments.ToList()
+        };
+
+        await OnSendMessage.InvokeAsync(addMessageDto);
+        
+        // Clear the form after sending
+        messageModel.Content = string.Empty;
+        pendingAttachments.Clear();
+        showAttachments = false;
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        // Send message on Ctrl+Enter or Cmd+Enter
+        if (e.Key == "Enter" && (e.CtrlKey || e.MetaKey))
+        {
+            await SendMessage();
+        }
+    }
+
+    private void ToggleAttachments()
+    {
+        showAttachments = !showAttachments;
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles(MaxFiles);
+        
+        foreach (var file in files)
+        {
+            if (file.Size > MaxFileSize)
+            {
+                continue; // Skip files that are too large
+            }
+
+            // For now, create a placeholder attachment
+            // In a real implementation, you'd upload the file to a storage service
+            var attachment = new MessageAttachmentDto
+            {
+                FileName = file.Name,
+                ContentType = file.ContentType,
+                Size = file.Size,
+                Url = $"/api/files/{Guid.NewGuid()}" // Placeholder URL
+            };
+
+            pendingAttachments.Add(attachment);
+        }
+
+        StateHasChanged();
+    }
+
+    private void RemoveAttachment(MessageAttachmentDto attachment)
+    {
+        pendingAttachments.Remove(attachment);
+        StateHasChanged();
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        const int unit = 1024;
+        if (bytes < unit) return $"{bytes} B";
+        
+        int exp = (int)(Math.Log(bytes) / Math.Log(unit));
+        string pre = "KMGTPE"[exp - 1].ToString();
+        return $"{bytes / Math.Pow(unit, exp):F1} {pre}B";
+    }
+}

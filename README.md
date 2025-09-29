@@ -32,6 +32,9 @@ This project is a sample Blazor Chat Application demonstrating the use of Blazor
 2. Once the solution is open, you will want to build the solution. This will download all of the NuGet packages that are required or the project.
 3. Open the Database.Example project and build the project then publish using the "StartupExample.publish.xml" profile.
 4. There should be no need to update the secrets.json file with the connection string as it should be configured in the appsettings.json file for SQL Server Instance.
+5. Open the project in Visual Studio
+6. Build the database project and publish to your local SQL Server instance.
+  - Update-Database -Project Blazor.Chat.App.Data -StartupProject Blazor.Chat.App.Web
 
 ### Using Docker Containers
 

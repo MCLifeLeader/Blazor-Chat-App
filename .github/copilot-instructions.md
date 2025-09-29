@@ -64,17 +64,29 @@ Use this structure as a guide when creating or updating files:
     Blazor.Chat.App/
       Blazor.Chat.App.ApiService/
         Properties/
+        Controllers/
+        Helpers/
+        HostedServices/
+        Models/
+        Services/
+        wwwroot/
+      Blazor.Chat.App.ApiService.Tests/
+        Services/
       Blazor.Chat.App.AppHost/
         Properties/
       Blazor.Chat.App.Data/
         Db/
           Migrations/
+        Cosmos/
+        Sql/
+      Blazor.Chat.App.Data.Tests/
       Blazor.Chat.App.ServiceDefaults/
-      Blazor.Chat.App.Tests/
       Blazor.Chat.App.Web/
         Components/
+          Layout/
         Properties/
         wwwroot/
+      Blazor.Chat.App.Web.Tests/
 ```
 
 ## HTML, CSS, and JavaScript Guidelines

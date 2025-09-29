@@ -1,0 +1,122 @@
+@using Blazor.Chat.App.ApiService.Models
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="chat-messages-container" @ref="messagesContainer">
+    @if (Messages?.Any() == true)
+    {
+        @foreach (var message in Messages)
+        {
+            <div class="message-item @(IsCurrentUserMessage(message) ? "current-user" : "other-user")"
+                 data-testid="chat-message">
+                <div class="message-header">
+                    <span class="sender-name">@message.SenderDisplayName</span>
+                    <span class="message-time">@message.SentAt.ToString("MMM dd, HH:mm")</span>
+                    @if (IsCurrentUserMessage(message) && OnEditMessage.HasDelegate)
+                    {
+                        <button class="btn-edit" @onclick="() => OnEditMessage.InvokeAsync(message)" 
+                                data-testid="edit-message-btn">
+                            Edit
+                        </button>
+                    }
+                    @if (IsCurrentUserMessage(message) && OnDeleteMessage.HasDelegate)
+                    {
+                        <button class="btn-delete" @onclick="() => OnDeleteMessage.InvokeAsync(message)" 
+                                data-testid="delete-message-btn">
+                            Delete
+                        </button>
+                    }
+                </div>
+                <div class="message-content">
+                    @if (message.Status == "Deleted")
+                    {
+                        <em class="deleted-message">This message was deleted</em>
+                    }
+                    else
+                    {
+                        <div class="message-text">@message.Content</div>
+                        @if (message.Attachments?.Any() == true)
+                        {
+                            <div class="message-attachments">
+                                @foreach (var attachment in message.Attachments)
+                                {
+                                    <div class="attachment-item">
+                                        <span class="attachment-name">@attachment.FileName</span>
+                                        <span class="attachment-size">(@FormatFileSize(attachment.Size))</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (message.EditedAt.HasValue)
+                        {
+                            <div class="edited-indicator">
+                                <em>Edited @message.EditedAt.Value.ToString("MMM dd, HH:mm")</em>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+    }
+    else if (IsLoading)
+    {
+        <div class="loading-messages" data-testid="loading-messages">
+            <div class="spinner"></div>
+            <span>Loading messages...</span>
+        </div>
+    }
+    else
+    {
+        <div class="no-messages" data-testid="no-messages">
+            <p>No messages yet. Be the first to start the conversation!</p>
+        </div>
+    }
+</div>
+
+@code {
+    private ElementReference messagesContainer;
+
+    [Parameter] public IEnumerable<ChatMessageDto>? Messages { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? CurrentUserId { get; set; }
+    [Parameter] public EventCallback<ChatMessageDto> OnEditMessage { get; set; }
+    [Parameter] public EventCallback<ChatMessageDto> OnDeleteMessage { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Auto-scroll to bottom when new messages are added
+        if (Messages?.Any() == true)
+        {
+            await messagesContainer.FocusAsync();
+            await Task.Delay(50); // Small delay to ensure rendering is complete
+            await ScrollToBottom();
+        }
+    }
+
+    private bool IsCurrentUserMessage(ChatMessageDto message)
+    {
+        return !string.IsNullOrEmpty(CurrentUserId) && 
+               message.SenderUserId?.ToString() == CurrentUserId;
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        const int unit = 1024;
+        if (bytes < unit) return $"{bytes} B";
+        
+        int exp = (int)(Math.Log(bytes) / Math.Log(unit));
+        string pre = "KMGTPE"[exp - 1].ToString();
+        return $"{bytes / Math.Pow(unit, exp):F1} {pre}B";
+    }
+
+    private async Task ScrollToBottom()
+    {
+        try
+        {
+            await messagesContainer.FocusAsync();
+        }
+        catch
+        {
+            // Ignore focus errors
+        }
+    }
+}

@@ -1,14 +1,100 @@
 ﻿@page "/chat"
+@page "/chat/{SessionId:guid?}"
 
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Authorization
+@using Blazor.Chat.App.ApiService.Models
+@using Blazor.Chat.App.Web.Components.Chat
 
 @attribute [Authorize]
 @rendermode InteractiveServer
 
-<PageTitle>Chat</PageTitle>
-<AuthorizeView>
-    Hello @context.User.Identity?.Name! Begin Chatting with your Friends
-</AuthorizeView>
+@inject ChatApiClient ChatApi
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 
+<PageTitle>Chat - @(currentSession?.Title ?? "Select a Chat")</PageTitle>
 
+<div class="chat-container" data-testid="chat-container">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h3>Chats</h3>
+            <button class="btn-new-chat" @onclick="CreateNewChat" data-testid="new-chat-btn">
+                + New Chat
+            </button>
+        </div>
+        
+        <div class="chat-sessions-list">
+            @if (chatSessions?.Any() == true)
+            {
+                @foreach (var session in chatSessions)
+                {
+                    <div class="chat-session-item @(session.Id == SessionId ? "active" : "")" 
+                         @onclick="() => SelectSession(session.Id)"
+                         data-testid="chat-session-item">
+                        <div class="session-title">@session.Title</div>
+                        <div class="session-info">
+                            <span class="last-activity">@session.LastActivityAt.ToString("MMM dd")</span>
+                            @if (session.IsGroup)
+                            {
+                                <span class="group-indicator">👥</span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else if (isLoadingSessions)
+            {
+                <div class="loading-sessions">Loading chats...</div>
+            }
+            else
+            {
+                <div class="no-sessions">No chats yet. Create your first chat!</div>
+            }
+        </div>
+    </div>
+
+    <div class="chat-main">
+        @if (SessionId.HasValue && currentSession is not null)
+        {
+            <div class="chat-header">
+                <h2>@currentSession.Title</h2>
+                @if (currentSession.IsGroup)
+                {
+                    <span class="participant-count">@currentSession.ParticipantCount participants</span>
+                }
+            </div>
+
+            <div class="chat-content">
+                <ChatMessageList Messages="@messages" 
+                                IsLoading="@isLoadingMessages"
+                                CurrentUserId="@currentUserId"
+                                OnEditMessage="@HandleEditMessage"
+                                OnDeleteMessage="@HandleDeleteMessage" />
+            </div>
+
+            <div class="chat-composer-container">
+                <ChatComposer IsLoading="@isSendingMessage"
+                             ErrorMessage="@errorMessage"
+                             OnSendMessage="@HandleSendMessage" />
+            </div>
+        }
+        else
+        {
+            <div class="chat-welcome" data-testid="chat-welcome">
+                <AuthorizeView>
+                    <h2>Welcome to Chat, @context.User.Identity?.Name!</h2>
+                    <p>Select an existing chat from the sidebar or create a new one to start chatting.</p>
+                </AuthorizeView>
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(globalErrorMessage))
+{
+    <div class="global-error" data-testid="global-error">
+        @globalErrorMessage
+        <button @onclick="() => globalErrorMessage = string.Empty">×</button>
+    </div>
+}
