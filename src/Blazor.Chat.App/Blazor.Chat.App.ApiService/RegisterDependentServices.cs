@@ -136,10 +136,6 @@ public static class RegisterDependentServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Configuration options
-        services.Configure<CosmosDbOptions>(configuration.GetSection(CosmosDbOptions.SectionName));
-        services.Configure<OutboxProcessorOptions>(configuration.GetSection(OutboxProcessorOptions.SectionName));
-
         // Entity Framework DbContext
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -150,12 +146,10 @@ public static class RegisterDependentServices
         // Cosmos DB Client
         services.AddSingleton<CosmosClient>(serviceProvider =>
         {
-            var cosmosOptions = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CosmosDbOptions>>().Value;
-
             var clientOptions = new CosmosClientOptions
             {
-                MaxRetryAttemptsOnRateLimitedRequests = cosmosOptions.MaxRetryAttempts,
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(cosmosOptions.MaxRetryWaitTimeSeconds),
+                MaxRetryAttemptsOnRateLimitedRequests = _appSettings.CosmosDb.MaxRetryAttempts,
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(_appSettings.CosmosDb.MaxRetryWaitTimeSeconds),
                 SerializerOptions = new CosmosSerializationOptions
                 {
                     PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase,
@@ -164,14 +158,12 @@ public static class RegisterDependentServices
             };
 
             // Use Managed Identity in production, connection string in development
-            if (!string.IsNullOrEmpty(cosmosOptions.PrimaryKey))
+            if (!string.IsNullOrEmpty(_appSettings.CosmosDb.PrimaryKey))
             {
-                return new CosmosClient(cosmosOptions.Endpoint, cosmosOptions.PrimaryKey, clientOptions);
+                return new CosmosClient(_appSettings.CosmosDb.Endpoint, _appSettings.CosmosDb.PrimaryKey, clientOptions);
             }
-            else
-            {
-                return new CosmosClient(cosmosOptions.Endpoint, new DefaultAzureCredential(), clientOptions);
-            }
+
+            return new CosmosClient(_appSettings.CosmosDb.Endpoint, new DefaultAzureCredential(), clientOptions);
         });
 
         // Repository registrations
