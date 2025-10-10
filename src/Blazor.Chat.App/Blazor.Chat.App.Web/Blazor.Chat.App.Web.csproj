@@ -4,15 +4,17 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>f0521576-68de-4d40-9535-e25cdfec7c89</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Blazor.Chat.App.ApiService\Blazor.Chat.App.ApiService.csproj" />
         <ProjectReference Include="..\Blazor.Chat.App.Data\Blazor.Chat.App.Data.csproj" />
         <ProjectReference Include="..\Blazor.Chat.App.ServiceDefaults\Blazor.Chat.App.ServiceDefaults.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.4.2" />
+        <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.9" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.9" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />

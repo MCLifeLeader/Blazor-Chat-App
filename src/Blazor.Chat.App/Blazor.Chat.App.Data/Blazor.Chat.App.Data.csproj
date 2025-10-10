@@ -17,4 +17,8 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Blazor.Chat.App.ServiceDefaults\Blazor.Chat.App.ServiceDefaults.csproj" />
+    </ItemGroup>
+
 </Project>

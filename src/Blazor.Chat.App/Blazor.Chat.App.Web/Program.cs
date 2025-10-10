@@ -1,4 +1,6 @@
 using Blazor.Chat.App.Data.Db;
+using Blazor.Chat.App.Data.Sql;
+using Blazor.Chat.App.ServiceDefaults;
 using Blazor.Chat.App.Web;
 using Blazor.Chat.App.Web.Components;
 using Blazor.Chat.App.Web.Components.Account;
@@ -45,6 +47,13 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
+    {
+        // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
+        // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
+        client.BaseAddress = new("https+http://apiservice");
+    });
+
+builder.Services.AddHttpClient<ChatApiClient>(client =>
     {
         // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
         // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.

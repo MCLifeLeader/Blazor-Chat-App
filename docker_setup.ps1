@@ -6,7 +6,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
     ## Pull the Docker images
     docker pull datalust/seq
     docker pull docker.io/library/redis
-    docker pull mailhog/mailhog
+    docker pull rnwood/smtp4dev
     docker pull mcr.microsoft.com/azure-messaging/servicebus-emulator
     docker pull mcr.microsoft.com/azure-sql-edge
     docker pull mcr.microsoft.com/azure-storage/azurite
@@ -17,7 +17,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
     docker pull wiremock/wiremock
 
     ## Start the vs multi-container
-    docker-compose -f "./containers/docker-compose-common.yml" -p common_shared up -d
+    docker-compose -f "./containers/docker-compose-common.yml" -p dev_common_shared up -d
 }
 
 Write-Host "Docker images and container setup completed."
