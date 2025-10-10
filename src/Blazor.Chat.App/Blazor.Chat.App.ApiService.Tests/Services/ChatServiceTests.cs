@@ -79,11 +79,29 @@ public class ChatServiceTests
     {
         // Arrange
         var userId = "test-user-123";
+        var sessionId = Guid.NewGuid();
         var createDto = new CreateSessionDto
         {
             Title = "Test Session",
             IsGroup = true
         };
+
+        // Mock the repository to return a created session
+        _sqlRepository.CreateSessionAsync(Arg.Any<ChatSession>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var session = callInfo.Arg<ChatSession>();
+                return Task.FromResult(new ChatSession
+                {
+                    Id = sessionId,
+                    Title = session.Title,
+                    IsGroup = session.IsGroup,
+                    CreatedByUserId = session.CreatedByUserId,
+                    TenantId = session.TenantId,
+                    CreatedAt = session.CreatedAt,
+                    LastActivityAt = session.LastActivityAt
+                });
+            });
 
         // Act
         var result = await _chatService.CreateSessionAsync(createDto, userId);
@@ -94,6 +112,10 @@ public class ChatServiceTests
         Assert.That(result.IsGroup, Is.EqualTo(createDto.IsGroup));
         Assert.That(result.CreatedByUserId, Is.EqualTo(userId));
         Assert.That(result.Id, Is.Not.EqualTo(Guid.Empty));
+        
+        // Verify repository methods were called
+        await _sqlRepository.Received(1).CreateSessionAsync(Arg.Any<ChatSession>(), Arg.Any<CancellationToken>());
+        await _sqlRepository.Received().AddParticipantAsync(Arg.Any<ChatParticipant>(), Arg.Any<CancellationToken>());
     }
 
     [Test]
