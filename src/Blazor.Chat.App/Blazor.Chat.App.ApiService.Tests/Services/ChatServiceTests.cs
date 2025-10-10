@@ -2,6 +2,7 @@ using Blazor.Chat.App.ApiService.Models;
 using Blazor.Chat.App.ApiService.Services;
 using Blazor.Chat.App.Data.Sql.Repositories;
 using Blazor.Chat.App.Data.Cosmos.Repositories;
+using Blazor.Chat.App.Data.Sql;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NUnit.Framework;
@@ -124,5 +125,124 @@ public class ChatServiceTests
 
         // Verify it called Cosmos first
         await _cosmosRepository.Received(1).GetSessionMessagesAsync(sessionId, page, pageSize);
+    }
+
+    [Test]
+    public async Task GetSessionMessagesAsync_WithCosmosData_MapsStringUserIdCorrectly()
+    {
+        // Arrange
+        var sessionId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+        var userId = "test-user-string-id-123"; // String user ID from Identity
+        var page = 1;
+        var pageSize = 50;
+
+        var cosmosDocument = new CosmosMessageDocument
+        {
+            id = messageId.ToString(),
+            sessionId = sessionId,
+            senderUserId = userId, // String, not Guid
+            senderDisplayName = "Test User",
+            sentAt = DateTime.UtcNow,
+            body = new MessageBody
+            {
+                content = "Test message content",
+                messageType = "text"
+            },
+            attachments = new List<MessageAttachment>(),
+            outboxId = Guid.NewGuid(),
+            metadata = new MessageMetadata
+            {
+                version = 1,
+                editHistory = new List<EditHistory>()
+            },
+            isDeleted = false,
+            documentType = "message"
+        };
+
+        var cosmosPage = new CosmosMessagePage
+        {
+            Messages = new List<CosmosMessageDocument> { cosmosDocument },
+            Count = 1,
+            HasMoreResults = false
+        };
+
+        _cosmosRepository.GetSessionMessagesAsync(sessionId, page, pageSize)
+            .Returns(cosmosPage);
+
+        // Act
+        var result = await _chatService.GetSessionMessagesAsync(sessionId, page, pageSize);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Messages, Has.Count.EqualTo(1));
+        var message = result.Messages.First();
+        Assert.That(message.SenderUserId, Is.EqualTo(userId)); // Should be string, not converted
+        Assert.That(message.SenderDisplayName, Is.EqualTo("Test User"));
+    }
+
+    [Test]
+    public async Task EditMessageAsync_StringUserId_DoesNotThrowGuidParseException()
+    {
+        // Arrange
+        var sessionId = Guid.NewGuid();
+        var messageId = Guid.NewGuid();
+        var userId = "test-user-string-id-456"; // String user ID from Identity
+        
+        var editDto = new EditMessageDto
+        {
+            Content = "Updated content",
+            Attachments = new List<MessageAttachmentDto>()
+        };
+
+        var existingMessage = new ChatMessage
+        {
+            Id = messageId,
+            SessionId = sessionId,
+            SenderUserId = userId, // String matches
+            Preview = "Old preview",
+            MessageLength = 100
+        };
+
+        var existingCosmosDoc = new CosmosMessageDocument
+        {
+            id = messageId.ToString(),
+            sessionId = sessionId,
+            senderUserId = userId,
+            senderDisplayName = "Test User",
+            sentAt = DateTime.UtcNow.AddMinutes(-10),
+            body = new MessageBody
+            {
+                content = "Original content",
+                messageType = "text"
+            },
+            attachments = new List<MessageAttachment>(),
+            outboxId = Guid.NewGuid(),
+            metadata = new MessageMetadata
+            {
+                version = 1,
+                editHistory = new List<EditHistory>()
+            }
+        };
+
+        _sqlRepository.GetMessageByIdAsync(messageId)
+            .Returns(existingMessage);
+        
+        _cosmosRepository.GetMessageByIdAsync(sessionId, messageId)
+            .Returns(existingCosmosDoc);
+
+        // Act - should not throw Guid.Parse exception
+        var result = await _chatService.EditMessageAsync(sessionId, messageId, editDto, userId);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Status, Is.EqualTo("Accepted"));
+        Assert.That(result.MessageId, Is.EqualTo(messageId));
+        
+        // Verify the repository was called to save the updated message
+        await _sqlRepository.Received(1).SaveMessageWithOutboxAsync(
+            Arg.Any<ChatMessage>(), 
+            Arg.Any<ChatOutbox>(), 
+            Arg.Any<CancellationToken>());
     }
 }
