@@ -12,7 +12,7 @@ namespace Blazor.Chat.App.ApiService;
 /// </summary>
 public static class SetupMiddlewarePipeline
 {
-    private static readonly string _swaggerName = "Ai Coaches Api";
+    private static readonly string _swaggerName = "Blazor Api";
 
     #region Main Middleware Pipeline
 
