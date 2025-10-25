@@ -13,8 +13,10 @@ using Blazor.Chat.App.ServiceDefaults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Net.Http; // For HttpClientHandler and HttpClient
 
 namespace Blazor.Chat.App.ApiService;
 
@@ -28,6 +30,12 @@ public static class RegisterDependentServices
 
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder, out AppSettings? appSettings)
     {
+        // Bind strongly-typed AppSettings from configuration and register via Options pattern
+        // This ensures configuration is available early and avoids static state issues at runtime.
+        _appSettings = new AppSettings();
+        builder.Configuration.Bind(_appSettings);
+        builder.Services.Configure<AppSettings>(builder.Configuration);
+
         // Add service defaults & Aspire client integrations.
         builder.AddServiceDefaults();
 
@@ -143,27 +151,74 @@ public static class RegisterDependentServices
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Bind CosmosDbOptions from configuration and register via Options pattern with validation
+        services
+            .AddOptions<CosmosDbOptions>()
+            .Bind(configuration.GetSection(CosmosDbOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Endpoint), "CosmosDb.Endpoint is required.")
+            .Validate(o =>
+            {
+                return Uri.TryCreate(o.Endpoint, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
+            }, "CosmosDb.Endpoint must be a valid https URI.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.DatabaseName), "CosmosDb.DatabaseName is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ContainerName), "CosmosDb.ContainerName is required.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.PartitionKey) && o.PartitionKey.StartsWith('/'), "CosmosDb.PartitionKey must start with '/'.")
+            .ValidateOnStart();
+
         // Cosmos DB Client
         services.AddSingleton<CosmosClient>(serviceProvider =>
         {
+            var cosmosOptions = serviceProvider.GetRequiredService<IOptions<CosmosDbOptions>>().Value;
+
+            // Parse the endpoint and, if running in a container, use host.docker.internal when configured for localhost.
+            var endpointUri = new Uri(cosmosOptions.Endpoint);
+            var runningInContainer = string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase);
+            if (runningInContainer && string.Equals(endpointUri.Host, "localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                // Redirect to the host machine from inside the container.
+                endpointUri = new UriBuilder(endpointUri) { Host = "host.docker.internal" }.Uri;
+            }
+
+            var isLocalEmulator = string.Equals(endpointUri.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+                                 || string.Equals(endpointUri.Host, "127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                                 || string.Equals(endpointUri.Host, "host.docker.internal", StringComparison.OrdinalIgnoreCase);
+
             var clientOptions = new CosmosClientOptions
             {
-                MaxRetryAttemptsOnRateLimitedRequests = _appSettings.CosmosDb.MaxRetryAttempts,
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(_appSettings.CosmosDb.MaxRetryWaitTimeSeconds),
+                MaxRetryAttemptsOnRateLimitedRequests = cosmosOptions.MaxRetryAttempts,
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(cosmosOptions.MaxRetryWaitTimeSeconds),
                 SerializerOptions = new CosmosSerializationOptions
                 {
                     PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase,
                     IgnoreNullValues = true
-                }
+                },
+                // Gateway is the most compatible option with the emulator
+                ConnectionMode = ConnectionMode.Gateway,
+                // Limit network calls to the provided endpoint (useful for emulator)
+                LimitToEndpoint = true
             };
 
-            // Use Managed Identity in production, connection string in development
-            if (!string.IsNullOrEmpty(_appSettings.CosmosDb.PrimaryKey))
+            // When talking to the local Cosmos DB Emulator, the TLS certificate is self-signed. In development we
+            // allow the connection by relaxing cert validation ONLY for localhost/host.docker.internal endpoints.
+            if (isLocalEmulator)
             {
-                return new CosmosClient(_appSettings.CosmosDb.Endpoint, _appSettings.CosmosDb.PrimaryKey, clientOptions);
+                clientOptions.HttpClientFactory = () =>
+                {
+                    var handler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (request, cert, chain, errors) => true
+                    };
+                    return new HttpClient(handler, disposeHandler: true);
+                };
             }
 
-            return new CosmosClient(_appSettings.CosmosDb.Endpoint, new DefaultAzureCredential(), clientOptions);
+            // Use Managed Identity in production, primary key in development
+            if (!string.IsNullOrEmpty(cosmosOptions.PrimaryKey))
+            {
+                return new CosmosClient(endpointUri.ToString(), cosmosOptions.PrimaryKey, clientOptions);
+            }
+
+            return new CosmosClient(endpointUri.ToString(), new DefaultAzureCredential(), clientOptions);
         });
 
         // Repository registrations
