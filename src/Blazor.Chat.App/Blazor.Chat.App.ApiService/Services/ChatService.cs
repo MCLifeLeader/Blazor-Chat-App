@@ -306,7 +306,7 @@ public class ChatService : IChatService
                         {
                             editedAt = DateTime.UtcNow,
                             previousContent = existingCosmosDoc.body.content,
-                            editedByUserId = Guid.Parse(userId)
+                            editedByUserId = userId
                         }
                     }).ToList()
                 }
@@ -490,7 +490,7 @@ public class ChatService : IChatService
         {
             Id = Guid.Parse(doc.id),
             SessionId = doc.sessionId,
-            SenderUserId = doc.senderUserId.ToString(),
+            SenderUserId = doc.senderUserId,
             SenderDisplayName = doc.senderDisplayName,
             SentAt = doc.sentAt,
             Content = doc.body.content,
