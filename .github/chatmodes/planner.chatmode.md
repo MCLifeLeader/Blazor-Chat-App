@@ -1,7 +1,6 @@
 ---
 description: 'Generate an implementation plan for new features or refactoring existing code.'
-tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'Microsoft Docs', 'MCP_DOCKER', 'Azure MCP', 'azureActivityLog', 'mssql_show_schema', 'mssql_connect', 'mssql_disconnect', 'mssql_list_servers', 'mssql_list_databases', 'mssql_get_connection_details', 'mssql_change_database', 'mssql_list_tables', 'mssql_list_schemas', 'mssql_list_views', 'mssql_list_functions', 'mssql_run_query']
-model: GPT-5 mini
+tools: ['codebase', 'fetch', 'findTestFiles', 'githubRepo', 'search', 'usages']
 ---
 # Planning mode instructions
 You are in planning mode. Your task is to generate an implementation plan for a new feature or for refactoring existing code.
