@@ -5,6 +5,15 @@
 services:
 
   # Local SQL Server Instance
+  #
+  # Custom build from local Dockerfile in ./mssql.
+  # Rationale: Allows for custom configuration, initialization scripts, or extensions not available in standard images.
+  # Build context: ./mssql (see Dockerfile in that directory).
+  # Environment variables:
+  #   - SA_PASSWORD: SQL Server system administrator password (required)
+  #   - ACCEPT_EULA: Must be set to "Y" to accept the license agreement (required)
+  #   - MSSQL_AGENT_ENABLED: Enables SQL Server Agent (optional, default "true")
+  # For more details on Dockerfile instructions, see: https://docs.docker.com/engine/reference/builder/
   mssql:
     build: ./mssql
     environment:
@@ -12,7 +21,9 @@ services:
       ACCEPT_EULA: "${ACCEPT_EULA}"
       MSSQL_AGENT_ENABLED: "true"
     ports:
-      - "127.0.0.1:10433:1433" # SQL Server Connection Port
+      - "127.0.0.1:10433:1433" # SQL Server Connection Port (localhost only for security)
+    volumes:
+      - mssql-data:/var/opt/mssql
     #restart: unless-stopped
     container_name: SqlServer
     hostname: mssql
@@ -78,7 +89,7 @@ services:
     image: wiremock/wiremock:latest
     ports:
         - "127.0.0.1:10080:8080" # Wiremock HTTP Port for API routes
-        #- "10443:8443" # Wiremock HTTPS Port for API routes
+        #- "127.0.0.1:10443:8443" # Wiremock HTTPS Port for API routes
     volumes:
         - ./extensions:/var/wiremock/extensions
         - ./__files:/home/wiremock/__files
@@ -148,4 +159,6 @@ volumes:
   seq-data:
     driver: local
   cosmos-data:
+    driver: local
+  mssql-data:
     driver: local
