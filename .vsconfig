@@ -47,7 +47,6 @@
         "Microsoft.VisualStudio.Component.AspNet",
         "Component.Microsoft.VisualStudio.Web.AzureFunctions",
         "Microsoft.VisualStudio.ComponentGroup.AzureFunctions",
-        "Microsoft.VisualStudio.Component.Debugger.Snapshot",
         "Microsoft.VisualStudio.ComponentGroup.Web.CloudTools",
         "Microsoft.VisualStudio.Component.IntelliTrace.FrontEnd",
         "Microsoft.VisualStudio.Component.DiagnosticTools",
@@ -86,16 +85,11 @@
         "Component.OpenJDK",
         "Microsoft.VisualStudio.Component.ManagedDesktop.Prerequisites",
         "Microsoft.VisualStudio.Component.DotNetModelBuilder",
-        "Microsoft.VisualStudio.Component.FSharp.Desktop",
         "Microsoft.ComponentGroup.Blend",
-        "Microsoft.VisualStudio.Workload.ManagedDesktop",
         "Microsoft.Component.NetFX.Native",
-        "Microsoft.VisualStudio.Workload.Data",
-        "Microsoft.VisualStudio.Workload.DataScience",
         "Microsoft.VisualStudio.Component.Workflow",
         "Microsoft.VisualStudio.Component.Sharepoint.Tools",
-        "Microsoft.VisualStudio.Component.TeamOffice",
-        "Microsoft.VisualStudio.Workload.Office"
+        "Microsoft.VisualStudio.Component.TeamOffice"
     ],
     "extensions": [
         "https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsls-vs-2022",

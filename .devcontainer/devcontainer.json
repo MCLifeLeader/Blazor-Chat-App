@@ -2,21 +2,55 @@
   "name": "Blazor.Chat.App Dev Container",
 
   // Base Image for the dev container. More info: https://aka.ms/vscode-remote/containers/images.
-  "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
-    "ghcr.io/azure/azure-dev/azd:0": {},
-    "ghcr.io/devcontainers/features/azure-cli:1": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/dotnet:2": {
-      "workloads": "aspire, wasm-tools",
-      "nuget": "true"
+    "ghcr.io/azure/azure-dev/azd:0": {
+      "version": "stable"
     },
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {},
-    "ghcr.io/devcontainers/features/powershell:1": {}
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "azureDnsAutoDetection": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true,
+      "version": "latest",
+      "dockerDashComposeVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "workloads" : [
+        "aspire",
+        "wasm-tools"
+      ],
+      "version": "latest",
+      "additionalVersions": "lts"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "installYarnUsingApt": true,
+      "version": "lts",
+      "pnpmVersion": "latest",
+      "nvmVersion": "latest"
+    },
+    "ghcr.io/devcontainers-extra/features/npm-package:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {},
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": true,
+      "version": "latest"
+    }
   },
 
   // Configure tool-specific properties.
@@ -48,7 +82,12 @@
         "ritwickdey.LiveServer",
         "yzhang.markdown-all-in-one",
         "msjsdiag.vscode-react-native",
-        "donjayamanne.bower"
+        "donjayamanne.bower",
+        "dbaeumer.vscode-eslint",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "VisualStudioExptTeam.vscodeintellicode-completions",
+        "ms-vscode.powershell",
+        "SonarSource.sonarlint-vscode"
       ]
     }
   },
@@ -90,6 +129,10 @@
     "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:23056"
   },
 
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+  ],
+
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-  "remoteUser": "root"
+  // "remoteUser": "root"
 }

@@ -1,8 +1,8 @@
 # Authors
 
-## Key project contributors
+## Project contributors
 
 | Name                   | GitHub Account        | Email                                           |
 |------------------------|-----------------------|-------------------------------------------------|
-| Michael Carey          | @MCLifeLeader         | Michael@AGameEmpowerment.com                    |
+| Michael Carey          | @MCLifeLeader         | Michael@AGameEmpowerment.com                   |
 |                        |                       |                                                 |

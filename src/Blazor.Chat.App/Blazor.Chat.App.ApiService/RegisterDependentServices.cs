@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Reflection;
 using System.Net.Http; // For HttpClientHandler and HttpClient
 
@@ -70,7 +70,7 @@ public static class RegisterDependentServices
             c.SwaggerDoc("v1", new ApiInfo().GetApiVersion("v1"));
             //c.SwaggerDoc("v2", new ApiInfo().GetApiVersion("v2"));
             c.OperationFilter<SwaggerResponseOperationFilter>();
-            c.DocumentFilter<AdditionalPropertiesDocumentFilter>();
+            //c.DocumentFilter<AdditionalPropertiesDocumentFilter>();
 
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -82,20 +82,20 @@ public static class RegisterDependentServices
                 Type = SecuritySchemeType.Http
             });
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Id = "Bearer",
-                            Type = ReferenceType.SecurityScheme
-                        }
-                    },
-                    new List<string>()
-                }
-            });
+            //c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //{
+            //    {
+            //        new OpenApiSecurityScheme
+            //        {
+            //            Reference = new OpenApiReference
+            //            {
+            //                Id = "Bearer",
+            //                Type = ReferenceType.SecurityScheme
+            //            }
+            //        },
+            //        new List<string>()
+            //    }
+            //});
 
             // Add informative documentation on API Route Endpoints for auto documentation on Swagger page.
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -110,8 +110,7 @@ public static class RegisterDependentServices
             {
                 document.Info.Version = $"{new ApiInfo().GetAssemblyVersion()}";
                 document.Info.Title = "Chat API Service";
-                document.Info.Description =
-                    "Documentation of all implemented endpoints, grouped by their route's base resource for Chat API Service.";
+                document.Info.Description = "Documentation of all implemented endpoints, grouped by their route's base resource for Chat API Service.";
                 document.Info.TermsOfService = new Uri("https://example.com/Terms-Of-Use");
                 document.Info.Contact = new OpenApiContact
                 {
