@@ -1,6 +1,6 @@
 ﻿using Blazor.Chat.App.ApiService.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Net;
 

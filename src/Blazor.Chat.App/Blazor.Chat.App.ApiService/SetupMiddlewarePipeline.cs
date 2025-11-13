@@ -140,14 +140,4 @@ public static class SetupMiddlewarePipeline
             throw;
         }
     }
-
-
-    #region Default Minimal Api Endpoints
-
-
-
-    #endregion
-
-
-
 }
