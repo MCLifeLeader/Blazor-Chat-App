@@ -20,10 +20,8 @@ public class ChatApiClientTests
     private HttpClient _httpClient = null!;
     private ChatApiClient _client = null!;
 
-    private readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+    // Use the shared JsonSerializerOptions from ChatApiClient to ensure consistency
+    private JsonSerializerOptions JsonOptions => ChatApiClient.JsonOptions;
 
     [SetUp]
     public void Setup()
@@ -70,7 +68,7 @@ public class ChatApiClientTests
         };
 
         _mockHttp.When(HttpMethod.Post, "/api/chats")
-            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, _jsonOptions));
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, JsonOptions));
 
         // Act
         var result = await _client.CreateSessionAsync(request);
@@ -142,7 +140,7 @@ public class ChatApiClientTests
         };
 
         _mockHttp.When(HttpMethod.Post, $"/api/chats/{sessionId}/messages")
-            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, _jsonOptions));
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, JsonOptions));
 
         // Act
         var result = await _client.SendMessageAsync(sessionId, request);
@@ -195,7 +193,7 @@ public class ChatApiClientTests
         };
 
         _mockHttp.When(HttpMethod.Get, $"/api/chats/{sessionId}/messages?page=1&pageSize=50")
-            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, _jsonOptions));
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, JsonOptions));
 
         // Act
         var result = await _client.GetMessagesAsync(sessionId);
@@ -226,7 +224,7 @@ public class ChatApiClientTests
         };
 
         _mockHttp.When(HttpMethod.Get, $"/api/chats/{sessionId}/messages?page={page}&pageSize={pageSize}")
-            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, _jsonOptions));
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, JsonOptions));
 
         // Act
         var result = await _client.GetMessagesAsync(sessionId, page, pageSize);
@@ -281,7 +279,7 @@ public class ChatApiClientTests
         };
 
         _mockHttp.When(HttpMethod.Patch, $"/api/chats/{sessionId}/messages/{messageId}")
-            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, _jsonOptions));
+            .Respond("application/json", JsonSerializer.Serialize(expectedResponse, JsonOptions));
 
         // Act
         var result = await _client.EditMessageAsync(sessionId, messageId, request);
