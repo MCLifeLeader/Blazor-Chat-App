@@ -49,4 +49,4 @@ if (Get-Command dotnet -ErrorAction SilentlyContinue) {
     Write-Warning ".NET SDK is not available. Skipping HTTPS certificate trust step."
 }
 
-Write-Host "run Setup_project.ps1 to complete the process..."
+Write-Host "run setup_project.ps1 to complete the process..."
