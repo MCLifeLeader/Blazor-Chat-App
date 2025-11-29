@@ -51,7 +51,8 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
 Use `winget` to install dependencies:
 
 ```pwsh
-winget install Microsoft.DotNet.SDK.10
+winget install Microsoft.DotNet.SDK.8
+winget install Microsoft.DotNet.SDK.9
 winget install Microsoft.PowerShell
 winget install Git.Git
 winget install Docker.DockerDesktop
@@ -88,10 +89,6 @@ Open the solution in Visual Studio and build to restore NuGet packages.
 To initialize the database:
 1. Build and publish the `Database.Example` project using the profile `StartupExample.Docker.publish.xml` (default password: `P@ssword123!`).
 2. Connection strings are managed in `appsettings.json`.
-3. To init the database run the following command in the Package Manager Console:
-```pwsh
-Update-Database -Project Blazor.Chat.App.Data -StartupProject Blazor.Chat.App.ApiService
-```
 
 > **⚠️ Security Warning**: The default password `P@ssword123!` is provided for **local development environments only** and must **never** be used in production. Always use strong, unique passwords and secure credential management solutions (e.g., Azure Key Vault, HashiCorp Vault) for production deployments.
 
