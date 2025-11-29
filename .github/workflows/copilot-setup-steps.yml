@@ -1,16 +1,8 @@
 name: "Copilot Setup Steps"
 
-# This workflow is intended to be run by the Copilot Agent. It supports being called
-# directly via `workflow_call`, manual runs, and runs when the workflow file changes.
+# Automatically run the setup steps when they are changed to allow for easy validation, and
+# allow manual testing through the repository's "Actions" tab
 on:
-  workflow_call:
-    inputs:
-      dotnet-version:
-        description: 'Dotnet SDK version to install (actions/setup-dotnet)'
-        required: false
-        type: string
-        default: '9.0.x'
-
   workflow_dispatch:
   push:
     paths:
@@ -19,16 +11,11 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
-# Prevent overlapping runs and keep a single active setup per workflow
-concurrency:
-  group: copilot-setup-steps-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
-    runs-on: ubuntu-latest
-    #runs-on: [self-hosted, Linux]
+    #runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
 
     # Set the permissions to the lowest permissions possible needed for your steps.
     # Copilot will be given its own token for its operations.
@@ -45,10 +32,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4.2.2
 
-    - name: Setup .NET
+    # - name: Setup .NET 8.x
+    #   uses: actions/setup-dotnet@v4.2.0
+    #   with:
+    #     dotnet-version: '8.0.x'
+
+    - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4.2.0
       with:
-        dotnet-version: ${{ inputs.dotnet-version }}
+        dotnet-version: '9.0.x'
+
+    # - name: Set up Node.js
+    #   uses: actions/setup-node@v4
+    #   with:
+    #     node-version: 'latest' # Always install the latest Node.js version
 
     - name: Update dotnet SDKs
       run: dotnet workload update
@@ -61,7 +58,3 @@ jobs:
 
     - name: Restore NuGet packages
       run: dotnet restore
-
-    # safety: limit job runtime so self-hosted runners aren't tied up forever
-    - name: Job timeout sentinel
-      run: echo "setup steps completed"
