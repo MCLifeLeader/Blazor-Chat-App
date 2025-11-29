@@ -157,8 +157,31 @@ public static class RegisterDependentServices
             .Validate(o => !string.IsNullOrWhiteSpace(o.Endpoint), "CosmosDb.Endpoint is required.")
             .Validate(o =>
             {
-                return Uri.TryCreate(o.Endpoint, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
-            }, "CosmosDb.Endpoint must be a valid https URI.")
+                // Validate that Endpoint is an absolute URI. Accept HTTPS everywhere.
+                // Accept HTTP only for known local emulator hosts so local development works with emulator endpoints.
+                if (!Uri.TryCreate(o.Endpoint, UriKind.Absolute, out var uri))
+                {
+                    return false;
+                }
+
+                if (uri.Scheme == Uri.UriSchemeHttps)
+                {
+                    return true;
+                }
+
+                if (uri.Scheme == Uri.UriSchemeHttp)
+                {
+                    var host = uri.Host;
+                    if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(host, "host.docker.internal", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }, "CosmosDb.Endpoint must be a valid https URI or a local emulator http URI.")
             .Validate(o => !string.IsNullOrWhiteSpace(o.DatabaseName), "CosmosDb.DatabaseName is required.")
             .Validate(o => !string.IsNullOrWhiteSpace(o.ContainerName), "CosmosDb.ContainerName is required.")
             .Validate(o => !string.IsNullOrWhiteSpace(o.PartitionKey) && o.PartitionKey.StartsWith('/'), "CosmosDb.PartitionKey must start with '/'.")
