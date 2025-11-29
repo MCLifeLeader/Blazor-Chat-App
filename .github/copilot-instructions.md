@@ -1,237 +1,156 @@
-# Copilot Instructions
+﻿# Devcontainer & Developer Toolbox Guidance
 
-These instructions define how GitHub Copilot should assist with this project. The goal is to ensure consistent, high-quality code generation aligned with our conventions, stack, and best practices.
+This file replaces the old project-specific Copilot instructions with focused guidance for maintaining developer devcontainers, Docker-based developer tools, and image maintenance best practices for this repository.
 
-## 🧠 Context
+Purpose: provide practical, actionable rules and recommendations contributors should follow when editing, building, publishing, or updating devcontainers and Docker images in this repository.
 
-- **Project Type**: Web API / Blazor Web Assembly Application
-- **Purpose**: This project is a web application that provides a RESTful API and a Blazor Web Assembly front-end application.
-- **Language**: C#, JavaScript, Blazor
-- **Data Persistence**: SQL Server / Cosmos DB
-- **Development Environment**: Visual Studio / VS Code
-- **Project Management Tool**: Azure DevOps
-- **Testing Framework**: nUnit, NSubstitute
-- **Version Control**: GitHub
-- **Framework / Libraries**: .NET 8+ / ASP.NET Core / nUnit / NSubstitute
-- **Architecture**: Clean Architecture / MVC / Onion, Services, Factory patterns, Repository patterns
+Keep this doc small and change-focused. When you need broader coding conventions for other parts of the project, prefer the repository's root-level documentation (for example `CONTRIBUTING.md`, `README.md`, and `devops/readme.md`).
 
+## Key responsibilities
 
-## 🔑 Core Architectural Rules
+- Keep devcontainers minimal and reproducible.
+- Build images with security and caching in mind.
+- Automate image builds, scans, and publishing in CI.
+- Version and tag images deterministically.
+- Provide clear, short troubleshooting notes for common developer workflows.
 
-**Data flow must always follow this path:**
+## Files of interest in this repo
+
+- `devcontainers/` (if present): devcontainer setups, Dockerfiles, and VS Code config.
+- `containers/` and `containers/__files/`: local example files used by images and compose.
+- `docker-compose*.yml`: compose stacks for running dependent services locally.
+- `mssql/`, `service-bus/`: examples and initialization scripts used by the toolbox images.
+- `devops/`: CI and pipeline conventions for building and publishing images.
+
+If you add a new devcontainer or Dockerfile, add a short note in this document describing intent, how to build, and how to run it locally.
+
+## Best practices for devcontainer and Dockerfile authors
+
+1. Small base images
+    - Prefer official, minimal images (Debian slim, distroless, Alpine where compatible). Use pinned tags for reproducible builds (for example, `mcr.microsoft.com/dotnet/sdk:8.0-ubuntu.22.04` rather than `latest`).
+
+2. Layering and cache friendliness
+    - Order Dockerfile steps to maximize cache reuse: install OS packages first, then copy package manifests and run package installs, then copy source. This reduces rebuild time for iterative development.
+
+3. Multi-stage builds
+    - Use multi-stage builds to keep final images minimal. Build-time dependencies should not be present in runtime images.
+
+4. Secrets and credentials
+    - Never store secrets in Dockerfiles, images, or in the repository. Use build-time secrets (for example Docker BuildKit secrets), devcontainer `runArgs`, or environment variable injection at runtime. Document any required credentials and how to supply them locally.
+
+5. Reproducible tooling versions
+    - Pin versions for language runtimes, package managers, and CLI tools. Add simple checks (for example `dotnet --info`) in README or a build script to help developers verify their environment.
+
+6. Image scanning and security
+    - Integrate a vulnerability scanner into CI (Trivy, Snyk, or GitHub Advanced Security). Scans should run for every image build and fail the pipeline on high/critical findings unless an approved exception exists.
+
+7. Non-root containers
+    - Run services as a non-root user when feasible. Document any ports and capabilities required.
+
+8. Build in CI and use reproducible tags
+    - CI builds should produce deterministic tags using semantics like `image-name:sha-<short-commit>` for ephemeral test builds and `image-name:semver` for releases.
+    - Keep a `latest` tag only if your release process clearly defines what `latest` means.
+
+9. Layered caching for CI
+    - Use build cache or registry cache to reduce CI build time. GitHub Actions has cache actions for Docker and Buildx. Document the cache strategy in `devops/`.
+
+10. Small runtime images
+    - Strip development tools from final runtime images to reduce attack surface and image size.
+
+11. Health checks
+    - Add HEALTHCHECK instructions for long-lived services so orchestrators and CI can verify readiness.
+
+12. Compose for local developer stacks
+    - Keep `docker-compose.yml` focused on dev ergonomics. Use overrides (for example `docker-compose.override.yml`) for developer-specific settings. Avoid committing secrets in compose files.
+
+13. Documentation and shortcuts
+    - Each devcontainer/Dockerfile should have a short README describing: build command, run command, exposed ports, volumes to mount (if any), and common troubleshooting steps. Keep examples concise.
+
+14. Test the developer experience (DX)
+    - Regularly verify that `devcontainer` builds and recommended compose flows work on a fresh machine. Add a simple CI job that attempts to build devcontainers and run smoke checks.
+
+## CI & publishing recommendations
+
+- Build matrix: run image builds for supported base OSes or variants.
+- Scanning: fail builds on critical vulnerabilities and report medium findings for triage.
+- Signing/Attestation: where possible, sign images in CI (Notary / Sigstore) and publish provenance.
+- Promotion flow: use a two-step flow — build+scan in PRs, push ephemeral test tags; for releases, run a release job that publishes semver tags and updates an image manifest if multi-arch.
+- Automated cleanup: implement TTL or lifecycle policies in registries to remove ephemeral images older than a set retention (for example 30 days).
+
+## Tagging and versioning strategy
+
+- Ephemeral/test builds: `image-name:pr-<pr-number>`, `image-name:sha-<short-commit>`
+- Release builds: `image-name:v<major>.<minor>.<patch>`
+- Latest: optionally `image-name:latest` with clearly documented semantic meaning
+
+Keep the tagging strategy simple and well-documented in `devops/readme.md` or `devops/pipelines`.
+
+## Troubleshooting & common commands
+
+- Build (local):
+  - docker build -t my-image:local -f containers/Dockerfile .
+- Build with BuildKit and secrets:
+  - DOCKER_BUILDKIT=1 docker build --secret id=npm,src=$HOME/.npmrc -t my-image:local .
+- Run:
+  - docker run --rm -it -p 8080:8080 -v ${PWD}:/workspace my-image:local
+- Compose up:
+  - docker compose -f docker-compose.yml up --build
+- Scan with Trivy:
+  - trivy image --exit-code 1 --severity CRITICAL,HIGH my-image:local
+
+Document any repo-specific variants of these commands in the devops folder or in the corresponding Dockerfile README.
+
+## Adding a new devcontainer or image
+
+1. Create the Dockerfile and a short README in the same folder.
+2. Add a devcontainer.json when relevant and reference the Dockerfile.
+3. Add CI steps: build, scan, smoke-test. Prefer reusing shared pipeline templates from `devops/pipelines/`.
+4. Update this document with a one-paragraph description of intent and any special run instructions.
+
+## Maintenance checklist for maintainers
+
+- Periodically (quarterly) review base image versions and rebuild to pick up OS/security patches.
+- Monitor CVE feeds and proactively update images for critical fixes.
+- Keep developer documentation up to date; if a change breaks a common DX flow, add a note and fix the CI.
+- Remove unused images and compose files from the repo — keep a small set of supported developer stacks.
+
+## Recommended tools and resources
+
+- Docker Build for multi-arch and cache-friendly builds
+- Trivy or Snyk for image scanning
+- GitHub Actions Docker cache or registry cache for CI performance
+- Docker Compose v2 (CLI integrated) for dev stacks
+- VS Code Remote - Containers / Dev Containers extension for VS Code integration
+- Sigstore (cosign) for signing images and attesting provenance
+
+## Short examples to copy into new images
+
+- Non-root user creation snippet:
 
 ```
-SQL or Cosmos DB
-    ↕ (Repository Layer)
-Business Logic / Service Layer
-    ↕ (API Controller Layer)
-Blazor Front-End
+RUN useradd -m dev && mkdir -p /workspace && chown dev:dev /workspace
+USER dev
+WORKDIR /workspace
 ```
 
-- **No direct repository calls** from controllers or Blazor components.
-- **All data access** must be through the Business / Service layer.
-- **DTO (Data Transfer Objects)** must be used to encapsulate data sent between the client and server.
-- Use extension method mappings for DTOs bidirectionally.
-- The Service layer may act as a thin pass-through to repositories if no additional logic is needed — but the layer must still exist.
-- All **external API calls** must be encapsulated in repository classes to ensure separation of concerns and testability.
-- Controllers should **never** bypass the Service layer, even for read-only queries.
-- This pattern must be followed for **all** CRUD, query, and integration operations.
-
-## 🔧 General Guidelines
-
-- Make only high confidence suggestions when reviewing code changes.
-- Format using `dotnet format` or IDE auto-formatting tools.
-- Prioritize readability, testability, and SOLID principles.
-- Use `CONTRIBUTING.md` for contribution guidelines.
-- C# class properties should be PascalCase. The JSON serializer will convert them to camelCase for the API, and the Blazor app will use camelCase as it receives the data from the API.
-- Use requirements file found `docs/requirements.csv` for project context and requirements.
-- Use the `docs/*` directory for project documentation.
-
-## 📁 Folder Structure
-
-Use this structure as a guide when creating or updating files:
+- Multi-stage build pattern:
 
 ```
-/
-  docs/
-  containers/
-    extensions/
-    mappings/
-    mssql/
-    service-bus/
-  devops/
-  src/
-    Blazor.Chat.App/
-      Blazor.Chat.App.ApiService/
-        Properties/
-        Controllers/
-        Helpers/
-        HostedServices/
-        Models/
-        Services/
-        wwwroot/
-      Blazor.Chat.App.ApiService.Tests/
-        Services/
-      Blazor.Chat.App.AppHost/
-        Properties/
-      Blazor.Chat.App.Data/
-        Db/
-          Migrations/
-        Cosmos/
-        Sql/
-      Blazor.Chat.App.Data.Tests/
-      Blazor.Chat.App.ServiceDefaults/
-      Blazor.Chat.App.Web/
-        Components/
-          Layout/
-        Properties/
-        wwwroot/
-      Blazor.Chat.App.Web.Tests/
+FROM node:20-alpine AS build
+WORKDIR /src
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /src/dist ./dist
+CMD ["node", "dist/index.js"]
 ```
 
-## HTML, CSS, and JavaScript Guidelines
+## Closing
 
-### Front-End Guidelines (Blazor)
+Keep this doc focused on the developer toolbox and images. If you need project-specific coding conventions or testing rules, use the main `CONTRIBUTING.md` and the relevant service/module documentation.
 
-Blazor development in this project should follow **component-based architecture principles** similar to **React**.
-Pages should be composed of smaller, reusable components, and components can nest other components to form complete pages.
-
-**Key Principles:**
-- **Strict Separation of Concerns**:
-  - The front-end and back-end code must remain independent.
-  - No business logic or direct data access should exist in `.razor` or client-side C# files.
-  - All server communication must be routed through the API layer.
-- **Componentization**:
-  - Break down pages into small, reusable components.
-  - Pages should primarily act as containers that assemble smaller UI components.
-  - Each component should handle a single, well-defined responsibility.
-- **Folder Structure**:
-  - Components, Pages, and Layouts should be organized under the `Components` folder.
-  - Use a `Layout` subfolder for shared layouts and navigation components.
-- **API Calls**:
-  - All API calls should be made through dedicated service classes — never directly from a component.
-  - Use `HttpClient` for API requests, configured in the `RegisterDependentServices.cs` file.
-- **Configuration**:
-  - Use `IOptions<T>` for all configuration settings.
-- **File Separation (Mandatory)**:
-  - HTML markup → `.razor` files
-  - C# logic → `.razor.cs` files
-  - CSS styling → `.razor.css` files
-  - JavaScript interop → `.js` files
-- **Testing & Debugging**:
-  - Whenever possible, add `data-testid` attributes to HTML elements to facilitate automated testing and debugging.
-- **Localization**:
-  - Use `.resx` resource files in the `Ai.Coach.Locale` project for all translatable UI strings.
-
-Following these guidelines ensures the Blazor application remains modular, testable, and maintainable — enabling easier scaling and consistent development practices.
-
-## 🧶 C# .NET Patterns
-
-### ✅ Patterns to Follow
-- Use `.editorconfig` for consistent code style. (If present, see root directory.)
-- Always use the latest version C# and .NET.
-- Use Clean Architecture with layered separation.
-- Use Dependency Injection for services and repositories.
-- Map DTOs to domain models using manual mapping extension classes and methods.
-- Use C#-idiomatic patterns and follow .NET coding conventions.
-- Use named methods instead of anonymous lambdas in business logic.
-- Use constructor injection for dependencies.
-- Register dependencies in the respective dependency injection file for Services, Repositories, and Factories.
-- Avoid magic strings. Use constants as can be found in the `Constants` folder.
-- A file can only contain one class declaration.
-- Use `IOptions<T>` for configuration settings.
-- Prefer using Task async/await whenever possible.
-- Use `ILogger<T>` for structured logging.
-  - Add logging in the constructor of classes and use it to log important events.
-
-### Back-end Guidelines
-- Use ASP.NET Core for the API (see `Ai.Coach.App.ApiService/`).
-- Use [ApiController], ActionResult<T>, and ProducesResponseType.
-- Handle errors using middleware and Problem Details.
-- Controllers should use attributes for parameter binding and validation to indicate from route, from body, from query, required, positiveInt, etc.
-- Controllers should inherit from BaseApiController, which provides common functionality for all controllers.
-- Inject the controller dependency bundle into the constructor to then pass to the base constructor.
-- Controllers should be kept simple, typically calling a single method on the service layer and returning the result.
-
-### Services
-- Services should be focused on a single conceptual need and should not be too large.
-- The general pattern for a loading service call is to load data via one or more repositories, then use a factory to convert the results into a model to return.
-- The general pattern for a saving service call is to use the factory to convert the submitted model into a repository model, then call the repository to save the data.
-- Services can contain business logic, though the logic is usually determining what repository to call and what factory to use.
-
-### Data and Repositories
-- Always use the repository pattern to abstract data access for all data sources, including:
-  - HttpClient REST calls: Encapsulate all external API interactions within repository classes to ensure separation of concerns and testability.
-  - SQL Data: Use repositories to manage all database queries and commands, keeping data access logic isolated from business logic.
-  - CosmosDb data calls: Implement repository classes to handle all interactions with CosmosDb, maintaining a consistent abstraction layer for data access.
-- Repositories should center around outputs that deal with a single entity type.
-- Repositories are very simple. For REST, they make an HTTP Client request using the http client wrapper on the expected client name and return the result. For SQL or CosmosDb, they encapsulate the query and data mapping logic.
-- Repositories to load data that rarely change (countries, permissions, languages etc.) should have a companion cache that implements IAbstractedCache and is registered in the DI container.
-
-### Factories
-- Methods to convert a data model to a UI model used for rendering should be called ToUi or something similar.
-- Methods that convert a UI model to a data model should be called ToSubmit or something similar.
-- Factories often use business logic in assembling a model based on data passed in, so they can be larger than a repository or service.
-- Factories can load data sparingly. It is appropriate to convert an id to an object (e.g., countryId to a country object). Factory load calls should favor repositories that use caching whenever possible.
-
-### 🚫 Patterns to Avoid
-- Don’t use static state or service locators.
-- Avoid logic in controllers—delegate to services/handlers.
-- Don’t hardcode config—use appsettings.json and IOptions.
-- Don’t expose entities directly in API responses.
-- Avoid fat controllers and God classes.
-
-### Nullable Reference Types
-
-- Declare variables non-nullable, and check for `null` at entry points.
-- Always use `is null` or `is not null` instead of `== null` or `!= null`.
-- Trust the C# null annotations and don't add null checks when the type system says a value cannot be null.
-
-### 🧪 .NET Testing Guidelines
-- Use the AAA pattern (Arrange, Act, Assert).
-  - When creating tests add the single comment for each section:
-    ```csharp
-    // Arrange
-    // Act
-    // Assert
-    ```
-- Use nUnit for unit testing.
-- Use NSubstitute for mocking.
-- Categorize tests with the TestFixture attribute on the test class definition.
-- Avoid infrastructure dependencies.
-- Name tests clearly.
-- Write the simplest test that fully validates the intended behavior, avoiding unnecessary assertions or setup.
-- Avoid logic in tests.
-- Prefer helper methods for setup and teardown.
-- Avoid multiple acts in a single test.
-- When a class has public virtual methods, use the partial mock pattern to test the class. This allows you to test the class without needing to mock the entire class.
-- Make sure to declare DoNotCallBase when testing methods that use the virtual methods, and mock a return value for the virtual method.
-- Verify that the virtual method was called with the correct parameters just like an injected dependency.
-- Prefer TDD for critical business logic and application services.
-
-## 🧩 Example Prompts
-- `Copilot, generate an ASP.NET Core controller with CRUD endpoints for Product.`
-- `Copilot, create an Entity Framework Core DbContext for a blog application.`
-- `Copilot, write an nUnit test for the CalculateInvoiceTotal method.`
-- `Copilot, generate a Blazor component for coach profile display.`
-
-## Running tests
-
-(1) Build from the root with `dotnet build Ai.Coach.sln`.
-(2) If that produces errors, fix those errors and build again. Repeat until the build is successful.
-(3) Run tests with `dotnet test **/*.tests.csproj`.
-(4) Tests are run with `dotnet test **/*tests.csproj`.
-(5) If any tests fail, fix those tests and re-run the tests until they all pass.
-
-## 🔁 Iteration & Review
-- Copilot output should be reviewed and modified before committing.
-- If code isn’t following these instructions, regenerate with more context or split the task.
-- Use /// XML documentation comments to clarify intent for Copilot and future devs.
-- Use Rider or Visual Studio code inspections to catch violations early.
-
-## 📚 References
-- [Microsoft C# Coding Conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- [ASP.NET Core Documentation](https://learn.microsoft.com/en-us/aspnet/core/?view=aspnetcore-8.0)
-- [Entity Framework Core Docs](https://learn.microsoft.com/en-us/ef/core/)
-- [nUnit Documentation](https://nunit.org/)
-- [Clean Architecture in .NET (by Jason Taylor)](https://github.com/jasontaylordev/CleanArchitecture)
+If you'd like, I can also add a small CI job example (GitHub Actions or Azure Pipelines) that builds, caches, scans, and publishes a test tag for one of the Dockerfiles in this repo — say which CI system you'd prefer and I'll add it as a follow-up change.

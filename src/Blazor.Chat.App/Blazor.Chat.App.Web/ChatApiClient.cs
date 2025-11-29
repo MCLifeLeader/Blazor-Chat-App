@@ -10,10 +10,15 @@ namespace Blazor.Chat.App.Web;
 /// </summary>
 public class ChatApiClient(HttpClient httpClient)
 {
-    private readonly JsonSerializerOptions _jsonOptions = new()
+    /// <summary>
+    /// Gets the shared JSON serialization options used by API clients.
+    /// </summary>
+    public static JsonSerializerOptions JsonOptions { get; } = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
+
+    private readonly JsonSerializerOptions _jsonOptions = JsonOptions;
 
     /// <summary>
     /// Creates a new chat session.
