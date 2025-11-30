@@ -27,7 +27,12 @@ public static class SetupMiddlewarePipeline
         // Initialize Cosmos DB
         InitializeCosmosDbAsync(app.Services).GetAwaiter().GetResult();
 
-        app.UseSwagger();
+        // Map Swagger-generated OpenAPI document at /openapi/{documentName}.json for consistent endpoint
+        app.UseSwagger(c =>
+        {
+            c.RouteTemplate = "openapi/{documentName}.json";
+        });
+
         app.UseSwaggerUI(c =>
         {
             c.EnableTryItOutByDefault();
@@ -40,8 +45,14 @@ public static class SetupMiddlewarePipeline
             c.DocumentTitle = $"{_swaggerName} Swagger UI";
         });
 
-        app.MapOpenApi();
-        app.MapScalarApiReference();
+        // Configure Scalar to use the Swagger-generated OpenAPI document
+        app.MapScalarApiReference(options =>
+        {
+            options
+                .WithTitle(_swaggerName)
+                .WithOpenApiRoutePattern("/openapi/{documentName}.json")
+                .AddDocument("v1", $"{_swaggerName} v1");
+        });
 
 
         // Configure the HTTP request pipeline.
@@ -53,11 +64,6 @@ public static class SetupMiddlewarePipeline
 
         // Map controllers
         app.MapControllers();
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
 
         string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
 
@@ -74,8 +80,7 @@ public static class SetupMiddlewarePipeline
                 .ToArray();
             return Results.Json(forecast);
         })
-            .WithName("GetWeatherForecast")
-            .WithOpenApi();
+            .WithName("GetWeatherForecast");
 
         // Serve index.html as the default file for the root URL
         app.UseDefaultFiles();

@@ -53,9 +53,6 @@ public static class RegisterDependentServices
         // Add services to the container.
         builder.Services.AddProblemDetails();
 
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi();
-
         builder.Services.AddApiVersioning(c =>
         {
             c.DefaultApiVersion = new ApiVersion(1, 0);
@@ -67,7 +64,24 @@ public static class RegisterDependentServices
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new ApiInfo().GetApiVersion("v1"));
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Chat API Service",
+                Version = $"{new ApiInfo().GetAssemblyVersion()}",
+                Description = $"Chat API Service documentation, © 2023 - {DateTime.UtcNow:yyyy} - Build Version: {typeof(ApiInfo).Assembly.GetName().Version}",
+                TermsOfService = new Uri("https://example.com/Terms-Of-Use"),
+                Contact = new OpenApiContact
+                {
+                    Name = "Support Services",
+                    Email = "Support@example.com",
+                    Url = new Uri("https://example.com/")
+                },
+                License = new OpenApiLicense
+                {
+                    Name = "Internal Only",
+                    Url = new Uri("https://example.com/")
+                }
+            });
             //c.SwaggerDoc("v2", new ApiInfo().GetApiVersion("v2"));
             c.OperationFilter<SwaggerResponseOperationFilter>();
             //c.DocumentFilter<AdditionalPropertiesDocumentFilter>();
@@ -82,49 +96,18 @@ public static class RegisterDependentServices
                 Type = SecuritySchemeType.Http
             });
 
-            //c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //{
-            //    {
-            //        new OpenApiSecurityScheme
-            //        {
-            //            Reference = new OpenApiReference
-            //            {
-            //                Id = "Bearer",
-            //                Type = ReferenceType.SecurityScheme
-            //            }
-            //        },
-            //        new List<string>()
-            //    }
-            //});
+            c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecuritySchemeReference("Bearer", null),
+                    new List<string>()
+                }
+            });
 
             // Add informative documentation on API Route Endpoints for auto documentation on Swagger page.
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             c.IncludeXmlComments(xmlPath);
-        });
-
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-        builder.Services.AddOpenApi(options =>
-        {
-            options.AddDocumentTransformer((document, context, cancellationToken) =>
-            {
-                document.Info.Version = $"{new ApiInfo().GetAssemblyVersion()}";
-                document.Info.Title = "Chat API Service";
-                document.Info.Description = "Documentation of all implemented endpoints, grouped by their route's base resource for Chat API Service.";
-                document.Info.TermsOfService = new Uri("https://example.com/Terms-Of-Use");
-                document.Info.Contact = new OpenApiContact
-                {
-                    Name = "Support Services",
-                    Email = "Support@example.com",
-                    Url = new Uri("https://example.com/")
-                };
-                document.Info.License = new OpenApiLicense
-                {
-                    Name = "Internal Only",
-                    Url = new Uri("https://example.com/")
-                };
-                return Task.CompletedTask;
-            });
         });
 
         appSettings = _appSettings;
