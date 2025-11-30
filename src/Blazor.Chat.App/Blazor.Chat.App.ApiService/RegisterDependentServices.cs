@@ -11,11 +11,11 @@ using Blazor.Chat.App.Data.Sql;
 using Blazor.Chat.App.Data.Sql.Repositories;
 using Blazor.Chat.App.ServiceDefaults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
-using System.Reflection;
 using System.Net.Http; // For HttpClientHandler and HttpClient
 
 namespace Blazor.Chat.App.ApiService;
@@ -60,54 +60,66 @@ public static class RegisterDependentServices
             c.ReportApiVersions = true;
         });
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
+        // Learn more about configuring OpenAPI at https://aka.ms/aspnetcore/openapi
+        builder.Services.AddOpenApi("v1", options =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo
+            // Add document transformer for metadata
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
-                Title = "Chat API Service",
-                Version = $"{new ApiInfo().GetAssemblyVersion()}",
-                Description = $"Chat API Service documentation, © 2023 - {DateTime.UtcNow:yyyy} - Build Version: {typeof(ApiInfo).Assembly.GetName().Version}",
-                TermsOfService = new Uri("https://example.com/Terms-Of-Use"),
-                Contact = new OpenApiContact
+                document.Info = new OpenApiInfo
                 {
-                    Name = "Support Services",
-                    Email = "Support@example.com",
-                    Url = new Uri("https://example.com/")
-                },
-                License = new OpenApiLicense
-                {
-                    Name = "Internal Only",
-                    Url = new Uri("https://example.com/")
-                }
-            });
-            //c.SwaggerDoc("v2", new ApiInfo().GetApiVersion("v2"));
-            c.OperationFilter<SwaggerResponseOperationFilter>();
-            //c.DocumentFilter<AdditionalPropertiesDocumentFilter>();
-
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Name = "Authorization",
-                Description = "Bearer Authentication with JWT Token",
-                Type = SecuritySchemeType.Http
+                    Title = "Chat API Service",
+                    Version = $"{new ApiInfo().GetAssemblyVersion()}",
+                    Description = $"Chat API Service documentation, © 2023 - {DateTime.UtcNow:yyyy} - Build Version: {typeof(ApiInfo).Assembly.GetName().Version}",
+                    TermsOfService = new Uri("https://example.com/Terms-Of-Use"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Support Services",
+                        Email = "Support@example.com",
+                        Url = new Uri("https://example.com/")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Internal Only",
+                        Url = new Uri("https://example.com/")
+                    }
+                };
+                return Task.CompletedTask;
             });
 
-            c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+            // Add document transformer for Bearer security scheme
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
             {
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+                document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
                 {
-                    new OpenApiSecuritySchemeReference("Bearer", null),
-                    new List<string>()
-                }
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Description = "Bearer Authentication with JWT Token",
+                    Type = SecuritySchemeType.Http
+                };
+                return Task.CompletedTask;
             });
 
-            // Add informative documentation on API Route Endpoints for auto documentation on Swagger page.
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            c.IncludeXmlComments(xmlPath);
+            // Add document transformer for security requirement
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
+            {
+                var securitySchemeRef = new OpenApiSecuritySchemeReference("Bearer", document);
+                var securityRequirement = new OpenApiSecurityRequirement
+                {
+                    { securitySchemeRef, [] }
+                };
+
+                document.Security ??= [];
+                document.Security.Add(securityRequirement);
+                return Task.CompletedTask;
+            });
+
+            // Add operation transformer for default responses
+            options.AddOperationTransformer<DefaultResponsesOperationTransformer>();
         });
 
         appSettings = _appSettings;
