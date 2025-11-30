@@ -59,7 +59,7 @@ src/Blazor.Chat.App/
 
 ## Testing Guidelines
 
-- Use xUnit, NUnit, or MSTest for unit tests
+- Use NUnit for unit tests
 - Do not include "Arrange", "Act", "Assert" comments
 - Follow existing test naming conventions in nearby files
 - Include tests for critical paths
