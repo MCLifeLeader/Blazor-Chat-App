@@ -12,7 +12,7 @@ namespace Blazor.Chat.App.ApiService;
 /// </summary>
 public static class SetupMiddlewarePipeline
 {
-    private static readonly string _swaggerName = "Blazor Api";
+    private static readonly string _swaggerName = "Chat API Service";
 
     #region Main Middleware Pipeline
 
@@ -35,9 +35,9 @@ public static class SetupMiddlewarePipeline
             c.EnableFilter();
             c.DisplayRequestDuration();
             c.EnableDeepLinking();
-            c.SwaggerEndpoint("/openapi/v1.json", $"Chat API Service v1");
+            c.SwaggerEndpoint("/openapi/v1.json", $"{_swaggerName} v1");
             c.InjectStylesheet("/css/SwaggerDark.css");
-            c.DocumentTitle = $"Chat API Service Swagger UI";
+            c.DocumentTitle = $"{_swaggerName} Swagger UI";
         });
 
         app.MapOpenApi();

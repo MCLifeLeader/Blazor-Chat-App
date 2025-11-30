@@ -1,5 +1,6 @@
 {
    "recommendations": [
+      "sonarsource.sonarlint-vscode",
       "ms-azuretools.vscode-bicep",
       "donjayamanne.bower",
       "ms-dotnettools.csharp",
@@ -14,6 +15,7 @@
       "ritwickdey.liveserver",
       "ms-vsliveshare.vsliveshare",
       "davidanson.vscode-markdownlint",
+      "christian-kohler.npm-intellisense",
       "ms-vscode.powershell",
       "esbenp.prettier-vscode",
       "ms-mssql.sql-database-projects-vscode",

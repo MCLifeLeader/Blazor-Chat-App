@@ -3,19 +3,6 @@
 <head>
     <meta charset="utf-8" />
     <title>Chat API Service Documentation</title>
-    <script>
-        document.addEventListener("DOMContentLoaded",
-            function() {
-                fetch("/api/Info/Version")
-                    .then(response => response.text())
-                    .then(version => {
-                        document.getElementById("api-version").textContent = version;
-                    })
-                    .catch(error => {
-                        document.getElementById("api-version").textContent = "Error loading version";
-                    });
-            });
-    </script>
 </head>
 <body>
     <h1>Chat API Service Documentation</h1>
