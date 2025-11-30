@@ -1,8 +1,91 @@
-﻿# Devcontainer & Developer Toolbox Guidance
+﻿# Blazor Chat App - Copilot Instructions
 
-This file replaces the old project-specific Copilot instructions with focused guidance for maintaining developer devcontainers, Docker-based developer tools, and image maintenance best practices for this repository.
+This document provides instructions for GitHub Copilot when working with the Blazor Chat App repository.
 
-Purpose: provide practical, actionable rules and recommendations contributors should follow when editing, building, publishing, or updating devcontainers and Docker images in this repository.
+## Repository Overview
+
+This is a **Blazor Chat Application** built with .NET Aspire, featuring:
+- **Blazor Web Frontend** (`Blazor.Chat.App.Web`) - Interactive UI components using Blazor
+- **API Service** (`Blazor.Chat.App.ApiService`) - Backend REST API service
+- **Data Layer** (`Blazor.Chat.App.Data`) - Entity Framework Core data access
+- **Service Defaults** (`Blazor.Chat.App.ServiceDefaults`) - Shared service configuration
+- **App Host** (`Blazor.Chat.App.AppHost`) - .NET Aspire orchestration
+
+## Build and Test Commands
+
+```bash
+# Restore dependencies
+dotnet restore
+
+# Build the solution
+dotnet build
+
+# Run all tests
+dotnet test
+
+# Run specific test project
+dotnet test src/Blazor.Chat.App/Blazor.Chat.App.ApiService.Tests/
+dotnet test src/Blazor.Chat.App/Blazor.Chat.App.Data.Tests/
+dotnet test src/Blazor.Chat.App/Blazor.Chat.App.Web.Tests/
+
+# Run the application (via Aspire host)
+dotnet run --project src/Blazor.Chat.App/Blazor.Chat.App.AppHost/
+```
+
+## Project Structure
+
+```
+src/Blazor.Chat.App/
+├── Blazor.Chat.App.AppHost/        # .NET Aspire orchestration
+├── Blazor.Chat.App.ServiceDefaults/ # Shared service configuration
+├── Blazor.Chat.App.ApiService/      # Backend API service
+├── Blazor.Chat.App.ApiService.Tests/
+├── Blazor.Chat.App.Data/            # Entity Framework Core data layer
+├── Blazor.Chat.App.Data.Tests/
+├── Blazor.Chat.App.Web/             # Blazor frontend
+└── Blazor.Chat.App.Web.Tests/
+```
+
+## Coding Standards
+
+- Follow the `.editorconfig` settings for code style and formatting
+- Use latest C# language features
+- Follow PascalCase for public members, camelCase with underscore prefix (`_fieldName`) for private fields
+- Use `var` for variable declarations when the type is apparent
+- Always use braces for control flow statements (enforced with error severity)
+- Prefer pattern matching and switch expressions
+- Use `is null` / `is not null` instead of `== null` / `!= null`
+- Constants should use ALL_UPPER_CASE naming
+
+## Testing Guidelines
+
+- Use NUnit for unit tests
+- Do not include "Arrange", "Act", "Assert" comments
+- Follow existing test naming conventions in nearby files
+- Include tests for critical paths
+
+## Important Files
+
+- `Blazor.Chat.App.sln` - Main solution file
+- `.editorconfig` - Code style and formatting rules
+- `.github/instructions/` - Path-specific Copilot instructions
+- `.github/chatmodes/` - Chat mode configurations
+- `.github/prompts/` - Reusable prompt templates
+- `containers/` - Docker configurations
+- `devops/` - CI/CD pipelines and infrastructure
+
+## Boundaries
+
+- Never modify files in `.git/` directory
+- Do not commit secrets or sensitive credentials
+- Keep changes focused and minimal
+- Follow existing patterns and conventions in the codebase
+
+---
+
+# Devcontainer & Developer Toolbox Guidance
+
+This section provides focused guidance for maintaining developer devcontainers, Docker-based developer tools, and image maintenance best practices for this repository.
 
 Keep this doc small and change-focused. When you need broader coding conventions for other parts of the project, prefer the repository's root-level documentation (for example `CONTRIBUTING.md`, `README.md`, and `devops/readme.md`).
 
