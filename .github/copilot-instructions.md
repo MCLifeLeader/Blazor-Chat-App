@@ -49,7 +49,7 @@ src/Blazor.Chat.App/
 ## Coding Standards
 
 - Follow the `.editorconfig` settings for code style and formatting
-- Use C# 13 features (latest language version)
+- Use latest C# language features
 - Follow PascalCase for public members, camelCase with underscore prefix (`_fieldName`) for private fields
 - Use `var` for variable declarations when the type is apparent
 - Always use braces for control flow statements (enforced with error severity)
