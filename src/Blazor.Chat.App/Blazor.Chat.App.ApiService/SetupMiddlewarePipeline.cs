@@ -27,11 +27,8 @@ public static class SetupMiddlewarePipeline
         // Initialize Cosmos DB
         InitializeCosmosDbAsync(app.Services).GetAwaiter().GetResult();
 
-        // Map Swagger-generated OpenAPI document at /openapi/{documentName}.json for consistent endpoint
-        app.UseSwagger(c =>
-        {
-            c.RouteTemplate = "openapi/{documentName}.json";
-        });
+        // Map built-in OpenAPI document at /openapi/{documentName}.json
+        app.MapOpenApi();
 
         app.UseSwaggerUI(c =>
         {
